@@ -1,0 +1,30 @@
+# Footwear RAG Agent Configuration
+# Copy this file and fill in your Snowflake credentials
+
+snowflake:
+  account: "ANWOGVY-CR41176"
+  user: "AARON.SHAH436"
+  password: "P5Vm4jDJ3C8kPa2"  # Add your password here
+  # authenticator: "externalbrowser"  # Comment this out
+  role: "ACCOUNTADMIN"
+  warehouse: "UOFTHACKS26_WH"
+  database: "FORENSIC_DB"
+  schema: "PUBLIC"
+
+data:
+  zip_directory: "footwear_rag/data/zip_files"  # Relative path from project root
+  csv_file: "footwear_rag/data/zip_files/Data-information.xlsx"  # Excel file with metadata
+  image_extensions:
+    - ".tiff"
+    - ".tif"
+  id_column: "ID"  # Column name in Excel that matches image filenames
+
+embedding:
+  model: "snowflake_native"
+  image_dimension: 512  # Must match the dimension in the database
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "*"

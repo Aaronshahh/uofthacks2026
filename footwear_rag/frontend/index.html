@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footwear RAG Agent | Forensic Analysis</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Footwear RAG Agent</h1>
+                    <span class="tagline">Forensic Footprint Analysis System</span>
+                </div>
+            </div>
+            <div class="header-status" id="systemStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <h2>Analyze Footprint</h2>
+                <p class="section-description">Upload a footprint image to find matching cases in the database</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <p class="upload-text">Drag & drop footprint image here</p>
+                    <p class="upload-hint">or click to browse</p>
+                    <p class="upload-formats">Supported: TIFF, PNG, JPEG</p>
+                    <input type="file" id="fileInput" accept=".tiff,.tif,.png,.jpg,.jpeg" hidden>
+                </div>
+
+                <div class="file-preview" id="filePreview" style="display: none;">
+                    <div class="preview-info">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="btn-remove" id="removeFile">Remove</button>
+                </div>
+
+                <button class="btn-analyze" id="analyzeBtn" disabled>
+                    <span class="btn-text">Analyze Footprint</span>
+                    <span class="btn-loading" style="display: none;">
+                        <svg class="spinner" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-linecap="round"></circle>
+                        </svg>
+                        Processing...
+                    </span>
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>Analysis Results</h2>
+                    <div class="results-meta" id="resultsMeta"></div>
+                </div>
+
+                <div class="cases-grid" id="casesGrid">
+                    <!-- Cases will be dynamically inserted here -->
+                </div>
+            </section>
+
+            <!-- Empty State -->
+            <section class="empty-state" id="emptyState">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path>
+                        <rect x="9" y="3" width="6" height="4" rx="2"></rect>
+                        <path d="M9 14l2 2 4-4"></path>
+                    </svg>
+                </div>
+                <h3>Ready for Analysis</h3>
+                <p>Upload a footprint image to find matching cases in the forensic database</p>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-info">
+                <span>Footwear RAG Agent v1.0</span>
+                <span class="separator">|</span>
+                <span id="recordCount">Database: Loading...</span>
+            </div>
+            <div class="footer-links">
+                <a href="/docs" target="_blank">API Docs</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="toast" id="toast" style="display: none;">
+        <span class="toast-message" id="toastMessage"></span>
+        <button class="toast-close" id="toastClose">&times;</button>
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        // Fallback: If app.js didn't load, add basic click handler
+        window.addEventListener('load', function() {
+            var uploadArea = document.getElementById('uploadArea');
+            var fileInput = document.getElementById('fileInput');
+            
+            if (uploadArea && fileInput && !window.appInitialized) {
+                console.log('Fallback: Adding basic upload handler');
+                uploadArea.onclick = function() {
+                    fileInput.click();
+                };
+            }
+        });
+    </script>
+</body>
+</html>
