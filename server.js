@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('.')); // Serve frontend files
+app.use('/uploads', express.static('uploads')); // Serve uploaded files
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -126,6 +127,13 @@ async function initializeDatabase() {
         await executeQuery(connection, `USE DATABASE ${process.env.SNOWFLAKE_DATABASE}`);
         await executeQuery(connection, `USE SCHEMA ${process.env.SNOWFLAKE_SCHEMA}`);
 
+        // Drop existing table if it has wrong column type
+        try {
+            await executeQuery(connection, `DROP TABLE IF EXISTS FORENSIC_EVIDENCE`);
+        } catch (dropError) {
+            // Ignore if table doesn't exist
+        }
+
         // Create forensic evidence table
         const createTableSQL = `
             CREATE TABLE IF NOT EXISTS FORENSIC_EVIDENCE (
@@ -139,14 +147,12 @@ async function initializeDatabase() {
                 FILE_NAMES TEXT,
                 FILE_COUNT NUMBER,
                 SUBMITTED_AT TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
-                METADATA VARIANT
+                METADATA VARCHAR(16777216)
             )
         `;
 
         await executeQuery(connection, createTableSQL);
-        console.log('✅ Database tables initialized successfully');
-
-        connection.destroy();
+        console.log('✅ Database tables initialized successfully');        connection.destroy();
         return true;
     } catch (error) {
         console.error('❌ Error initializing database:', error);
@@ -224,7 +230,14 @@ app.post('/api/evidence/forensic', upload.array('files'), async (req, res) => {
             success: true,
             message: 'Evidence saved locally (Snowflake not configured)',
             fileCount: files.length,
-            mode: 'local'
+            mode: 'local',
+            files: files.map(f => ({
+                name: f.originalname,
+                size: f.size,
+                type: f.mimetype,
+                url: `/uploads/${f.filename}`,
+                savedName: f.filename
+            }))
         });
     }
 
@@ -254,10 +267,11 @@ app.post('/api/evidence/forensic', upload.array('files'), async (req, res) => {
         // Connect to Snowflake and insert data
         const connection = await createSnowflakeConnection();
 
+        // Pass JSON string directly - Snowflake will auto-convert to VARIANT
         const insertSQL = `
             INSERT INTO FORENSIC_EVIDENCE
             (CASE_NUMBER, DESCRIPTION, COLLECTED_BY, DATE_COLLECTED, TIME_COLLECTED, LOCATION, FILE_NAMES, FILE_COUNT, METADATA)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, PARSE_JSON(?))
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await executeQuery(connection, insertSQL, [
@@ -278,7 +292,14 @@ app.post('/api/evidence/forensic', upload.array('files'), async (req, res) => {
             success: true,
             message: 'Forensic evidence uploaded to Snowflake successfully',
             fileCount: fileCount,
-            mode: 'snowflake'
+            mode: 'snowflake',
+            files: files.map(f => ({
+                name: f.originalname,
+                size: f.size,
+                type: f.mimetype,
+                url: `/uploads/${f.filename}`,
+                savedName: f.filename
+            }))
         });
 
     } catch (error) {
@@ -290,7 +311,14 @@ app.post('/api/evidence/forensic', upload.array('files'), async (req, res) => {
             message: 'Evidence saved locally (Snowflake upload failed)',
             fileCount: files.length,
             mode: 'local',
-            warning: error.message
+            warning: error.message,
+            files: files.map(f => ({
+                name: f.originalname,
+                size: f.size,
+                type: f.mimetype,
+                url: `/uploads/${f.filename}`,
+                savedName: f.filename
+            }))
         });
     }
 });

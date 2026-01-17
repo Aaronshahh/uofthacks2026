@@ -170,34 +170,56 @@ submitBtn.addEventListener('click', async () => {
             } else if (result.mode === 'local') {
                 showNotification('Evidence saved locally 📁 ' + (result.warning ? '(Snowflake unavailable)' : ''));
             }
+
+            // Create evidence object for local display with file URLs from server
+            const evidence = {
+                id: Date.now(),
+                caseNumber: caseNumber || 'N/A',
+                category: currentCategory,
+                description,
+                collectedBy,
+                dateCollected,
+                timeCollected,
+                location,
+                files: result.files || uploadedFiles.map(file => ({
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type || 'Unknown'
+                })),
+                timestamp: new Date().toISOString(),
+                storedIn: result.mode === 'snowflake' ? 'Snowflake' : 'Local'
+            };
+
+            evidenceItems.push(evidence);
+            saveToLocalStorage();
+            renderEvidence();
+            resetForm();
         } else {
             // For other categories, just save locally for now
+            const evidence = {
+                id: Date.now(),
+                caseNumber: caseNumber || 'N/A',
+                category: currentCategory,
+                description,
+                collectedBy,
+                dateCollected,
+                timeCollected,
+                location,
+                files: uploadedFiles.map(file => ({
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type || 'Unknown'
+                })),
+                timestamp: new Date().toISOString(),
+                storedIn: 'Local'
+            };
+
+            evidenceItems.push(evidence);
+            saveToLocalStorage();
+            renderEvidence();
+            resetForm();
             showNotification('Evidence submitted successfully!');
         }
-
-        // Create evidence object for local display
-        const evidence = {
-            id: Date.now(),
-            caseNumber: caseNumber || 'N/A',
-            category: currentCategory,
-            description,
-            collectedBy,
-            dateCollected,
-            timeCollected,
-            location,
-            files: uploadedFiles.map(file => ({
-                name: file.name,
-                size: formatFileSize(file.size),
-                type: file.type || 'Unknown'
-            })),
-            timestamp: new Date().toISOString(),
-            storedIn: currentCategory === 'forensic' ? 'Snowflake' : 'Local'
-        };
-
-        evidenceItems.push(evidence);
-        saveToLocalStorage();
-        renderEvidence();
-        resetForm();
 
     } catch (error) {
         console.error('Error uploading evidence:', error);
@@ -364,13 +386,34 @@ function showDetails(id) {
             </div>
             <div>
                 <strong style="color: var(--gold);">Files Attached (${evidence.files.length}):</strong>
-                <ul style="margin-top: 10px; padding-left: 20px;">
-                    ${evidence.files.map(file => `
-                        <li style="margin: 5px 0;">
-                            <strong>${file.name}</strong> - ${file.size}
-                        </li>
-                    `).join('')}
-                </ul>
+                <div style="margin-top: 15px;">
+                    ${evidence.files.map(file => {
+                        const isImage = file.type?.startsWith('image/') || file.name?.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i);
+                        return `
+                            <div style="margin-bottom: 15px; padding: 10px; background: var(--accent-blue); border-radius: 5px;">
+                                <div style="margin-bottom: 8px;">
+                                    <strong>${file.name}</strong> - ${file.size || formatFileSize(file.size)}
+                                </div>
+                                ${isImage && file.url ? `
+                                    <div style="margin-top: 10px;">
+                                        <img src="http://localhost:3000${file.url}"
+                                             alt="${file.name}"
+                                             style="max-width: 100%; max-height: 400px; border-radius: 5px; cursor: pointer;"
+                                             onclick="window.open('http://localhost:3000${file.url}', '_blank')">
+                                        <p style="font-size: 11px; margin-top: 5px; opacity: 0.7;">Click image to view full size</p>
+                                    </div>
+                                ` : ''}
+                                ${file.url ? `
+                                    <a href="http://localhost:3000${file.url}"
+                                       target="_blank"
+                                       style="color: var(--gold); text-decoration: none; font-size: 12px;">
+                                        📥 Download File
+                                    </a>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             </div>
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--accent-blue);">
                 <button onclick="deleteEvidence(${evidence.id})" style="background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600;">

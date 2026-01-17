@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Case Analysis - Detective System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .analysis-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            background: #2c3e50;
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: #d4af37;
+            color: #1a1a2e;
+        }
+
+        .analysis-form {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            margin-bottom: 30px;
+        }
+
+        .analysis-form h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section label {
+            display: block;
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-section textarea,
+        .form-section input {
+            width: 100%;
+            background: #0f1621;
+            color: #e8e8e8;
+            border: 1px solid #d4af37;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .form-section textarea {
+            min-height: 100px;
+        }
+
+        .btn-analyze-case {
+            background: #d4af37;
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-analyze-case:hover {
+            background: #f0c744;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-analyze-case:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #d4af37;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #0f1621;
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-container {
+            display: none;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .results-container h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .agent-report {
+            background: #0f1621;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .agent-report h3 {
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+
+        .agent-report pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .concluding-report {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid #d4af37;
+            margin-top: 30px;
+        }
+
+        .concluding-report h2 {
+            color: #d4af37;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .concluding-report pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .error-message {
+            background: #5c1a1a;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="badge">
+            <div class="badge-icon">★</div>
+        </div>
+        <div class="header-content">
+            <h1>POLICE DEPARTMENT</h1>
+            <p class="subtitle">AI Case Analysis System</p>
+        </div>
+    </div>
+
+    <div class="analysis-container">
+        <a href="index.html" class="back-btn">← Back to Evidence Upload</a>
+
+        <div class="analysis-form">
+            <h2>🤖 Submit Case for AI Analysis</h2>
+            <p style="color: #e8e8e8; margin-bottom: 20px;">
+                Fill in all case details below. Our AI agents will analyze the information and provide a comprehensive report.
+            </p>
+
+            <form id="caseAnalysisForm">
+                <div class="form-section">
+                    <label for="incidentOverview">📋 Incident Overview *</label>
+                    <textarea
+                        id="incidentOverview"
+                        name="Inc_over"
+                        placeholder="Describe the incident: What happened? When? Where? Key details..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label for="targets">🎯 Target(s) / Suspect(s) *</label>
+                    <textarea
+                        id="targets"
+                        name="Targ"
+                        placeholder="List suspects or persons of interest: Names, descriptions, known information..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label for="physicalEvidence">🔬 Physical Evidence *</label>
+                    <textarea
+                        id="physicalEvidence"
+                        name="Phy_Evi"
+                        placeholder="Describe physical evidence: Fingerprints, DNA, weapons, clothing, etc..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label for="witnessTestimony">👥 Witness Testimony *</label>
+                    <textarea
+                        id="witnessTestimony"
+                        name="wit_test"
+                        placeholder="Record witness statements: What did they see? Hear? Any identifying details..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label for="leads">🔗 Leads & Additional Information *</label>
+                    <textarea
+                        id="leads"
+                        name="leads"
+                        placeholder="Document leads, tips, connections, or any other relevant information..."
+                        required
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="btn-analyze-case" id="analyzeBtn">
+                    🔍 Analyze Case with AI
+                </button>
+            </form>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <h3>🔍 AI Agents Analyzing Case...</h3>
+            <p>Physical Evidence Agent → Witness Agent → Timeline Reconstruction</p>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <h2>📊 AI Analysis Results</h2>
+
+            <div id="agentReports">
+                <!-- Agent reports will be inserted here -->
+            </div>
+
+            <div class="concluding-report">
+                <h2>🎯 Concluding Report</h2>
+                <pre id="concludingReport"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('caseAnalysisForm');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const agentReports = document.getElementById('agentReports');
+        const concludingReport = document.getElementById('concludingReport');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Hide previous results and errors
+            resultsContainer.classList.remove('active');
+            errorMessage.classList.remove('active');
+
+            // Show loading
+            loadingIndicator.classList.add('active');
+            analyzeBtn.disabled = true;
+
+            // Collect form data
+            const formData = new FormData(form);
+            const caseData = {
+                Inc_over: formData.get('Inc_over'),
+                Targ: formData.get('Targ'),
+                Phy_Evi: formData.get('Phy_Evi'),
+                wit_test: formData.get('wit_test'),
+                leads: formData.get('leads')
+            };
+
+            try {
+                console.log('Submitting case for analysis:', caseData);
+
+                // Create abort controller for timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+
+                // Call the Python agent API
+                const response = await fetch('http://localhost:5000/api/analyze-case', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(caseData),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Server error');
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('Analysis complete:', result);
+
+                    // Display agent reports
+                    agentReports.innerHTML = '';
+                    result.agent_reports.forEach((report, index) => {
+                        const reportDiv = document.createElement('div');
+                        reportDiv.className = 'agent-report';
+                        reportDiv.innerHTML = `
+                            <h3>Agent Report ${index + 1}</h3>
+                            <pre>${report}</pre>
+                        `;
+                        agentReports.appendChild(reportDiv);
+                    });
+
+                    // Display concluding report
+                    concludingReport.textContent = result.concluding_report;
+
+                    // Show results
+                    loadingIndicator.classList.remove('active');
+                    resultsContainer.classList.add('active');
+
+                    // Scroll to results
+                    resultsContainer.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+
+            } catch (error) {
+                console.error('Error analyzing case:', error);
+                loadingIndicator.classList.remove('active');
+
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = 'Analysis timed out. The case data might be too complex. Try simplifying your inputs or try again.';
+                } else if (error.message.includes('fetch')) {
+                    errorMsg = 'Cannot connect to AI Agent API. Make sure the Python server is running on port 5000.';
+                }
+
+                errorMessage.textContent = `❌ Error: ${errorMsg}`;
+                errorMessage.classList.add('active');
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

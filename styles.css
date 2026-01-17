@@ -88,6 +88,27 @@ body {
     color: rgba(255, 255, 255, 0.5);
 }
 
+.btn-analyze {
+    background: var(--gold);
+    color: var(--primary-dark);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.btn-analyze:hover {
+    background: #f0c744;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
+}
+
 .container {
     display: flex;
     max-width: 1600px;
