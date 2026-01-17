@@ -113,7 +113,7 @@ function removeFile(index) {
 }
 
 // Submit evidence
-submitBtn.addEventListener('click', () => {
+submitBtn.addEventListener('click', async () => {
     const caseNumber = document.getElementById('caseNumber').value;
     const description = document.getElementById('evidenceDescription').value;
     const collectedBy = document.getElementById('collectedBy').value;
@@ -132,31 +132,105 @@ submitBtn.addEventListener('click', () => {
         return;
     }
 
-    // Create evidence object
-    const evidence = {
-        id: Date.now(),
-        caseNumber: caseNumber || 'N/A',
-        category: currentCategory,
-        description,
-        collectedBy,
-        dateCollected,
-        timeCollected,
-        location,
-        files: uploadedFiles.map(file => ({
-            name: file.name,
-            size: formatFileSize(file.size),
-            type: file.type || 'Unknown'
-        })),
-        timestamp: new Date().toISOString()
-    };
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading...';
 
-    evidenceItems.push(evidence);
-    saveToLocalStorage();
-    renderEvidence();
-    resetForm();
+    try {
+        // If forensic category, send to backend/Snowflake
+        if (currentCategory === 'forensic') {
+            const formData = new FormData();
+            formData.append('caseNumber', caseNumber || 'N/A');
+            formData.append('description', description);
+            formData.append('collectedBy', collectedBy);
+            formData.append('dateCollected', dateCollected);
+            formData.append('timeCollected', timeCollected);
+            formData.append('location', location);
 
-    // Success notification
-    showNotification('Evidence submitted successfully!');
+            // Append all files
+            uploadedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            const response = await fetch('http://localhost:3000/api/evidence/forensic', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to upload to backend');
+            }
+
+            const result = await response.json();
+            console.log('Upload result:', result);
+
+            // Show appropriate message based on storage mode
+            if (result.mode === 'snowflake') {
+                showNotification('Forensic evidence uploaded to Snowflake! ❄️');
+            } else if (result.mode === 'local') {
+                showNotification('Evidence saved locally 📁 ' + (result.warning ? '(Snowflake unavailable)' : ''));
+            }
+        } else {
+            // For other categories, just save locally for now
+            showNotification('Evidence submitted successfully!');
+        }
+
+        // Create evidence object for local display
+        const evidence = {
+            id: Date.now(),
+            caseNumber: caseNumber || 'N/A',
+            category: currentCategory,
+            description,
+            collectedBy,
+            dateCollected,
+            timeCollected,
+            location,
+            files: uploadedFiles.map(file => ({
+                name: file.name,
+                size: formatFileSize(file.size),
+                type: file.type || 'Unknown'
+            })),
+            timestamp: new Date().toISOString(),
+            storedIn: currentCategory === 'forensic' ? 'Snowflake' : 'Local'
+        };
+
+        evidenceItems.push(evidence);
+        saveToLocalStorage();
+        renderEvidence();
+        resetForm();
+
+    } catch (error) {
+        console.error('Error uploading evidence:', error);
+        // Still save locally even if server upload fails
+        const evidence = {
+            id: Date.now(),
+            caseNumber: caseNumber || 'N/A',
+            category: currentCategory,
+            description,
+            collectedBy,
+            dateCollected,
+            timeCollected,
+            location,
+            files: uploadedFiles.map(file => ({
+                name: file.name,
+                size: formatFileSize(file.size),
+                type: file.type || 'Unknown'
+            })),
+            timestamp: new Date().toISOString(),
+            storedIn: 'Local (server offline)'
+        };
+
+        evidenceItems.push(evidence);
+        saveToLocalStorage();
+        renderEvidence();
+        resetForm();
+
+        showNotification('Evidence saved locally (server offline) 📴');
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Evidence';
+    }
 });
 
 // Reset form
