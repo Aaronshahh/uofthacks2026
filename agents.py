@@ -1,10 +1,9 @@
-from typing import TypedDict, Annotated, List
+from typing import TypedDict, Annotated, List, Optional
 import operator
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from langgraph.graph import StateGraph, END
-# Make sure to set your API key
-os.environ["GOOGLE_API_KEY"] = "AIzaSyAMU0wzYEpMOEC6Zt7Xp0jUj4jve824e2o"
+from RAG.rag_query import RAGQueryService, format_cases_for_display
 
 '''
 This class is the shared folder that all of the chatbots have access to,
@@ -33,6 +32,7 @@ class CaseState(TypedDict):
     Phy_Evi: str
     wit_test: str
     leads: str
+    evidence_image: Optional[bytes]  # Raw image bytes for physical evidence from frontend
 
 
 llm = ChatGoogleGenerativeAI(
@@ -40,14 +40,44 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.3
 )
 
+# Initialize RAG Query Service
+rag_service = RAGQueryService()
+
 
 def physical_evidence_node(state: CaseState):
+    """
+    Physical evidence analysis node with RAG retrieval.
+    Searches for similar cases in the database based on evidence image.
+    """
+    rag_context = ""
+    
+    # If evidence image is provided, retrieve similar cases from database
+    if state.get('evidence_image'):
+        print(f"📸 Evidence image detected: {len(state['evidence_image'])} bytes")
+        try:
+            print("🔍 Querying RAG service for similar cases...")
+            rag_result = rag_service.query(state['evidence_image'])
+            rag_context = format_cases_for_display(rag_result)
+            print(f"✅ RAG retrieval successful: {len(rag_result.cases)} cases found")
+        except Exception as e:
+            print(f"❌ RAG retrieval failed: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            rag_context = f"Note: RAG retrieval failed ({str(e)}). Proceeding with case analysis."
+    else:
+        print("⚠️ No evidence image provided - skipping RAG retrieval")
+    
+    print(f"\n--- RAG Context ---\n{rag_context}\n-------------------\n")
+
     prompt = f"""You are a forensic scientist. Provide a CONCISE analysis (max 200 words).
 
     Physical Evidence: {state['Phy_Evi']}
     Case Context: {state['Inc_over']}
+    
+    Similar Cases from Database:
+    {rag_context if rag_context else 'No similar cases found in database.'}
 
-    Focus on: Key findings, significance, and connections to the case."""
+    Focus on: Key findings, significance, connections to the case, and how this evidence compares to similar historical cases."""
     response = llm.invoke(prompt)
     report_text = response.content if hasattr(response, 'content') else str(response)
     return {"agent_reports": [f"PHYSICAL EVIDENCE REPORT: {report_text}"]}

@@ -257,6 +257,23 @@
                 </div>
 
                 <div class="form-section">
+                    <label for="evidenceImage">📸 Evidence Image (Optional - for RAG Analysis)</label>
+                    <input
+                        type="file"
+                        id="evidenceImage"
+                        name="evidence_image"
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/tiff,image/bmp"
+                        style="padding: 8px; cursor: pointer;"
+                    >
+                    <small style="color: #aaa; display: block; margin-top: 5px;">
+                        Upload footprint, fingerprint, or other visual evidence for similarity matching
+                    </small>
+                    <div id="imagePreview" style="margin-top: 10px; display: none;">
+                        <img id="previewImg" style="max-width: 200px; max-height: 200px; border: 2px solid #d4af37; border-radius: 5px;">
+                    </div>
+                </div>
+
+                <div class="form-section">
                     <label for="witnessTestimony">👥 Witness Testimony *</label>
                     <textarea
                         id="witnessTestimony"
@@ -312,6 +329,24 @@
         const agentReports = document.getElementById('agentReports');
         const concludingReport = document.getElementById('concludingReport');
         const errorMessage = document.getElementById('errorMessage');
+        const evidenceImageInput = document.getElementById('evidenceImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        // Image preview handler
+        evidenceImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -324,30 +359,32 @@
             loadingIndicator.classList.add('active');
             analyzeBtn.disabled = true;
 
-            // Collect form data
-            const formData = new FormData(form);
-            const caseData = {
-                Inc_over: formData.get('Inc_over'),
-                Targ: formData.get('Targ'),
-                Phy_Evi: formData.get('Phy_Evi'),
-                wit_test: formData.get('wit_test'),
-                leads: formData.get('leads')
-            };
+            // Collect form data as multipart/form-data
+            const formData = new FormData();
+            formData.append('Inc_over', document.getElementById('incidentOverview').value);
+            formData.append('Targ', document.getElementById('targets').value);
+            formData.append('Phy_Evi', document.getElementById('physicalEvidence').value);
+            formData.append('wit_test', document.getElementById('witnessTestimony').value);
+            formData.append('leads', document.getElementById('leads').value);
+
+            // Add evidence image if provided
+            const imageFile = evidenceImageInput.files[0];
+            if (imageFile) {
+                formData.append('evidence_image', imageFile);
+                console.log('Evidence image attached:', imageFile.name);
+            }
 
             try {
-                console.log('Submitting case for analysis:', caseData);
+                console.log('Submitting case for analysis...');
 
                 // Create abort controller for timeout
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
 
-                // Call the Python agent API
+                // Call the Python agent API with multipart/form-data
                 const response = await fetch('http://localhost:5000/api/analyze-case', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(caseData),
+                    body: formData,  // Send as multipart, no Content-Type header needed
                     signal: controller.signal
                 });
 
