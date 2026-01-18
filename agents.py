@@ -1,6 +1,6 @@
 from typing import TypedDict, Annotated, List, Optional
 import operator
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 import os
 from langgraph.graph import StateGraph, END
 from RAG.rag_query import RAGQueryService, format_cases_for_display
@@ -12,18 +12,17 @@ try:
 except ImportError:
     pass  # python-dotenv not installed, skip
 
-# Load Google API key from environment variable
-# Get your API key from: https://makersuite.google.com/app/apikey
-if not os.getenv("GOOGLE_API_KEY"):
+# Load OpenAI API key from environment variable
+if not os.getenv("OPENAI_API_KEY"):
     raise ValueError(
-        "GOOGLE_API_KEY environment variable is not set. "
-        "Please set it with: export GOOGLE_API_KEY='your-api-key' "
-        "or add GOOGLE_API_KEY=your-api-key to a .env file"
+        "OPENAI_API_KEY environment variable is not set. "
+        "Please set it with: export OPENAI_API_KEY='your-api-key' "
+        "or add OPENAI_API_KEY=your-api-key to a .env file"
     )
 
 '''
 This class is the shared folder that all of the chatbots have access to,
-from here very specific information is going to be passed to each gemini agent
+from here very specific information is going to be passed to each AI agent
 which is then passed into their system prompt
 
 the folder will contain:
@@ -51,10 +50,10 @@ class CaseState(TypedDict):
     evidence_image: Optional[bytes]  # Raw image bytes for physical evidence from frontend
 
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
     temperature=0.3,
-    google_api_key=os.getenv("GOOGLE_API_KEY")
+    api_key=os.getenv("OPENAI_API_KEY")
 )
 
 # Initialize RAG Query Service
