@@ -18,9 +18,9 @@
         <a href="index.html" class="back-btn">← Back to Evidence Upload</a>
 
         <div class="analysis-form">
-            <h2>Submit Case for AI Analysis</h2>
+            <h2>Submit Case for Analysis</h2>
             <p style="color: #e8e8e8; margin-bottom: 20px;">
-                Fill in all case details below. Our AI agents will analyze the information and provide a comprehensive report.
+                Fill in the case details below. Three AI agents will analyze the data and generate a report.
             </p>
 
             <form id="caseAnalysisForm">
@@ -29,17 +29,17 @@
                     <textarea
                         id="incidentOverview"
                         name="Inc_over"
-                        placeholder="Describe the incident: What happened? When? Where? Key details..."
+                        placeholder="What happened? When and where did it occur?"
                         required
                     ></textarea>
                 </div>
 
                 <div class="form-section">
-                    <label for="targets">🎯 Target(s) / Suspect(s) *</label>
+                    <label for="targets">🎯 Suspects / Persons of Interest *</label>
                     <textarea
                         id="targets"
                         name="Targ"
-                        placeholder="List suspects or persons of interest: Names, descriptions, known information..."
+                        placeholder="Names, descriptions, or any known info about suspects"
                         required
                     ></textarea>
                 </div>
@@ -49,13 +49,13 @@
                     <textarea
                         id="physicalEvidence"
                         name="Phy_Evi"
-                        placeholder="Describe physical evidence: Fingerprints, DNA, weapons, clothing, etc..."
+                        placeholder="Fingerprints, DNA, weapons, footprints, clothing, etc."
                         required
                     ></textarea>
                 </div>
 
                 <div class="form-section">
-                    <label for="evidenceImage">📸 Evidence Image (Optional - for RAG Analysis)</label>
+                    <label for="evidenceImage">📸 Evidence Image (Optional)</label>
                     <input
                         type="file"
                         id="evidenceImage"
@@ -64,7 +64,7 @@
                         style="padding: 8px; cursor: pointer;"
                     >
                     <small style="color: #aaa; display: block; margin-top: 5px;">
-                        Upload footprint, fingerprint, or other visual evidence for similarity matching
+                        Upload footprints, fingerprints, or other visual evidence
                     </small>
                     <div id="imagePreview" style="margin-top: 10px; display: none;">
                         <img id="previewImg" style="max-width: 200px; max-height: 200px; border: 2px solid #d4af37; border-radius: 5px;">
@@ -72,27 +72,27 @@
                 </div>
 
                 <div class="form-section">
-                    <label for="witnessTestimony">👥 Witness Testimony *</label>
+                    <label for="witnessTestimony">👥 Witness Statements *</label>
                     <textarea
                         id="witnessTestimony"
                         name="wit_test"
-                        placeholder="Record witness statements: What did they see? Hear? Any identifying details..."
+                        placeholder="What did witnesses see or hear? Any identifying details?"
                         required
                     ></textarea>
                 </div>
 
                 <div class="form-section">
-                    <label for="leads">🔗 Leads & Additional Information *</label>
+                    <label for="leads">🔗 Leads & Other Info *</label>
                     <textarea
                         id="leads"
                         name="leads"
-                        placeholder="Document leads, tips, connections, or any other relevant information..."
+                        placeholder="Any tips, connections, or additional information"
                         required
                     ></textarea>
                 </div>
 
                 <button type="submit" class="btn-analyze-case" id="analyzeBtn">
-                    🔍 Analyze Case with AI
+                    🔍 Run Analysis
                 </button>
             </form>
 
@@ -101,19 +101,19 @@
 
         <div class="loading" id="loadingIndicator">
             <div class="spinner"></div>
-            <h3>🔍 AI Agents Analyzing Case...</h3>
-            <p>Physical Evidence Agent → Witness Agent → Timeline Reconstruction</p>
+            <h3>🔍 Analyzing Case...</h3>
+            <p>Physical Evidence → Witness Analysis → Timeline Reconstruction</p>
         </div>
 
         <div class="results-container" id="resultsContainer">
-            <h2>📊 AI Analysis Results</h2>
+            <h2>📊 Analysis Results</h2>
 
             <div id="agentReports">
                 <!-- Agent reports will be inserted here -->
             </div>
 
             <div class="concluding-report">
-                <h2>🎯 Concluding Report</h2>
+                <h2>🎯 Summary Report</h2>
                 <pre id="concludingReport"></pre>
             </div>
         </div>
@@ -229,9 +229,9 @@
 
                 let errorMsg = error.message;
                 if (error.name === 'AbortError') {
-                    errorMsg = 'Analysis timed out. The case data might be too complex. Try simplifying your inputs or try again.';
+                    errorMsg = 'Analysis timed out. Try again with shorter descriptions.';
                 } else if (error.message.includes('fetch')) {
-                    errorMsg = 'Cannot connect to AI Agent API. Make sure the Python server is running on port 5000.';
+                    errorMsg = 'Can\'t connect to the server. Make sure it\'s running on port 5000.';
                 }
 
                 errorMessage.textContent = `❌ Error: ${errorMsg}`;
