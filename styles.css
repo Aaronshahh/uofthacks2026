@@ -734,39 +734,69 @@ body::after {
     display: block;
 }
 
-.results-container > h2 {
-    font-family: 'Orbitron', monospace;
-    color: var(--accent-primary);
-    font-size: 28px;
-    margin-bottom: 32px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
+        .results-container h2 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        padding: 16px;
-    }
+        .agent-report {
+            background: var(--bg-secondary);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-left: 4px solid var(--accent);
+        }
 
-    .header {
-        padding: 16px 24px;
-    }
+        .agent-report h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
 
-    .header-content h1 {
-        font-size: 32px;
-    }
+        .agent-report pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
 
-    .main-content {
-        padding: 24px;
-    }
+        .concluding-report {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid var(--bg-elevated);
+            margin-top: 30px;
+        }
 
-    .action-cards {
-        grid-template-columns: 1fr;
-    }
+        .concluding-report h2 {
+            color: var(--accent);
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
 
-    .hero-text {
-        font-size: 16px;
-    }
-}
+        .concluding-report pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .error-message {
+            background: #5c1a1a;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }

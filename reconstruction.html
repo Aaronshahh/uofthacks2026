@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveillance Reconstruction | Anchor</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .reconstruction-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .page-intro {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-intro h2 {
+            font-family: 'Courier New', monospace;
+            color: #ff3333;
+            font-size: 28px;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+
+        .page-intro p {
+            color: #888;
+            font-size: 14px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .source-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .source-info h3 {
+            color: #3b82f6;
+            font-size: 14px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .source-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .source-file {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #10b981;
+        }
+
+        .generate-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        .generate-btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .generate-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .future-notice {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .future-notice span {
+            font-size: 24px;
+        }
+
+        .future-notice p {
+            color: #fbbf24;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #888;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            border-color: #555;
+            color: #fff;
+        }
+
+        .nav-tab.active {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: #dc2626;
+            color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🗁 Anchor</h1>
+            <p class="subtitle">Surveillance Reconstruction</p>
+        </div>
+    </div>
+
+    <div class="reconstruction-page">
+        <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab">Evidence Upload</a>
+            <a href="case-analysis.html" class="nav-tab">Case Analysis</a>
+            <a href="reconstruction.html" class="nav-tab active">Reconstruction</a>
+        </nav>
+
+        <div class="page-intro">
+            <h2>📹 SURVEILLANCE FOOTAGE RECONSTRUCTION</h2>
+            <p>Generate AI-reconstructed CCTV footage frames based on case reports. 
+               Creates 5 sequential surveillance-style images depicting the timeline of events.</p>
+        </div>
+
+        <div class="source-info">
+            <h3>📁 CURRENT DATA SOURCE (DEMO MODE)</h3>
+            <div class="source-files">
+                <div class="source-file">📄 message.txt (Police Report)</div>
+                <div class="source-file">🖼️ Isabella Stewart Gardner Museum Heist</div>
+                <div class="source-file">📅 March 18, 1990</div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <button id="generateBtn" class="generate-btn" onclick="generateReconstruction()">
+            🎬 Generate Reconstruction
+        </button>
+
+        <div id="reconstructionContainer" class="surveillance-reconstruction" style="display: none;">
+            <div class="storyboard-header">
+                <h2>🎬 RECONSTRUCTED SURVEILLANCE FOOTAGE</h2>
+                <div class="storyboard-subtitle">Isabella Stewart Gardner Museum - March 18, 1990</div>
+            </div>
+            <div id="reconstructionStatus" class="reconstruction-status"></div>
+            <div id="storyboardFrames" class="storyboard-grid"></div>
+        </div>
+
+        <div class="future-notice">
+            <span>🔮</span>
+            <p><strong>Coming Soon:</strong> This feature will be integrated with the Case Analysis page. 
+               Upload evidence files and submit a case, then automatically generate surveillance reconstructions 
+               based on the AI-analyzed report.</p>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const reconstructionContainer = document.getElementById('reconstructionContainer');
+        const reconstructionStatus = document.getElementById('reconstructionStatus');
+        const storyboardFrames = document.getElementById('storyboardFrames');
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message active ${type}`;
+        }
+
+        function hideStatus() {
+            statusMessage.className = 'status-message';
+        }
+
+        async function generateReconstruction() {
+            generateBtn.disabled = true;
+            generateBtn.classList.add('loading');
+            reconstructionContainer.style.display = 'none';
+            
+            showStatus('🎬 Generating surveillance frames... This takes 2-3 minutes.', 'info');
+
+            try {
+                const response = await fetch('http://localhost:5000/api/generate-reconstruction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`✅ Generated ${result.data.completed}/${result.data.total} frames successfully!`, 'success');
+                    displayStoryboard(result.data);
+                } else {
+                    throw new Error(result.error || 'Generation failed');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('loading');
+            }
+        }
+
+        function displayStoryboard(data) {
+            reconstructionContainer.style.display = 'block';
+
+            const status = data.status || 'failed';
+            const statusColors = {
+                'complete': '#10b981',
+                'partial': '#f59e0b',
+                'failed': '#ef4444'
+            };
+
+            reconstructionStatus.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <span class="rec-indicator ${status === 'complete' ? 'recording' : ''}"></span>
+                    <span style="color: ${statusColors[status]}; font-weight: 600; font-family: 'Courier New', monospace;">
+                        ${status === 'complete' ? 'FOOTAGE RECOVERED' : status.toUpperCase()}
+                    </span>
+                    <span style="color: #666; margin-left: auto; font-family: 'Courier New', monospace; font-size: 12px;">
+                        ${data.completed || 0}/${data.total || 5} FRAMES
+                    </span>
+                </div>
+            `;
+
+            storyboardFrames.innerHTML = '';
+
+            const frames = data.frames || [];
+
+            if (frames.length > 0) {
+                frames.forEach((frame, index) => {
+                    const frameCard = document.createElement('div');
+                    frameCard.className = 'storyboard-frame';
+                    frameCard.style.animationDelay = `${index * 0.15}s`;
+
+                    if (frame.status === 'complete' && frame.url) {
+                        frameCard.innerHTML = `
+                            <div class="frame-header">
+                                <span class="cam-label">${frame.camera || 'CAM 0' + (index + 1)}</span>
+                                <span class="rec-dot"></span>
+                                <span class="rec-label">REC</span>
+                            </div>
+                            <div class="frame-image-container">
+                                <img src="${frame.url}" alt="${frame.camera}" class="frame-image" onclick="openLightbox(this.src, '${frame.camera}', '${frame.timestamp || ''}', '${(frame.description || '').replace(/'/g, "\\'")}')">
+                                <div class="scanlines"></div>
+                            </div>
+                            <div class="frame-footer">
+                                <span class="timestamp">${frame.timestamp || 'MAR 18 1990'}</span>
+                            </div>
+                            <div class="frame-description">${frame.description || ''}</div>
+                        `;
+                    } else {
+                        frameCard.innerHTML = `
+                            <div class="frame-header">
+                                <span class="cam-label">CAM 0${index + 1}</span>
+                                <span class="error-indicator">ERROR</span>
+                            </div>
+                            <div class="frame-error">
+                                <span style="font-size: 32px; opacity: 0.5;">📡</span>
+                                <p>SIGNAL LOST</p>
+                                <small>${frame.error || 'Frame generation failed'}</small>
+                            </div>
+                        `;
+                    }
+
+                    storyboardFrames.appendChild(frameCard);
+                });
+            } else {
+                storyboardFrames.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                        <span style="font-size: 48px; opacity: 0.3;">📹</span>
+                        <p style="margin-top: 15px; font-family: 'Courier New', monospace;">NO FOOTAGE AVAILABLE</p>
+                    </div>
+                `;
+            }
+
+            // Scroll to results
+            reconstructionContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openLightbox(src, camera, timestamp, description) {
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <div class="lightbox-header">
+                        <span class="cam-label">${camera}</span>
+                        <span class="rec-dot"></span>
+                        <span class="rec-label">REC</span>
+                        <span class="lightbox-close" onclick="this.closest('.lightbox').remove()">&times;</span>
+                    </div>
+                    <img src="${src}" alt="${camera}">
+                    <div class="lightbox-footer">
+                        <span class="timestamp">${timestamp}</span>
+                        <p class="lightbox-description">${description}</p>
+                    </div>
+                </div>
+            `;
+            lightbox.onclick = (e) => {
+                if (e.target === lightbox) lightbox.remove();
+            };
+            document.body.appendChild(lightbox);
+        }
+    </script>
+</body>
+</html>

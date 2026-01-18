@@ -1,0 +1,118 @@
+================================================================================
+DETECTIVE CASE ANALYSIS - CONCLUDING REPORT
+================================================================================
+
+📋 CASE OVERVIEW:
+On October 14th, 2025, at approximately 9:10 PM, emergency services were called to a detached residential home in the Maple Ridge neighborhood.
+
+A resident reported discovering a seriously injured individual inside the home upon returning from an evening outing.
+
+The scene showed signs of disturbance, but no immediate indication of forced entry at the main door.
+
+The injured individual was transported to hospital and survived but was unconscious at the time of discovery.
+
+Investigators were tasked with determining:
+
+how the individual was injured
+
+whether a crime occurred
+
+and whether the scene had been altered prior to discovery
+
+
+🎯 TARGET(S):
+1. Alex Carter (Homeowner)
+
+Age: 27
+
+Occupation: Freelance graphic designer
+
+Reported discovering the scene after returning home
+
+Claims to have been away from the house between 6:30 PM – 9:00 PM
+
+Relationship to injured party: roommate
+
+2. Jordan Lee (Injured Individual)
+
+Age: 26
+
+Occupation: Graduate student
+
+Found on the kitchen floor near the counter
+
+No recollection of events (post-incident amnesia reported later)
+
+3. Maya Thompson (Neighbor)
+
+Age: 34
+
+Lives directly across the street
+
+Reported hearing a loud noise earlier in the evening
+
+4. Unknown Individual
+
+Witnesses reported a person seen walking away from the property shortly before emergency services arrived
+
+No facial identification available
+
+
+================================================================================
+SPECIALIST ANALYSIS REPORTS
+================================================================================
+
+Report 1:
+--------------------------------------------------------------------------------
+PHYSICAL EVIDENCE REPORT: The evidence points to a violent incident occurring in the kitchen, indicated by the blood pool, droplets, and tipped chair, suggesting an injury and possible struggle.
+
+The shattered rear window, with glass predominantly outside, strongly indicates it was broken from the *inside*, suggesting an exit or escape attempt rather than forced entry. The unlocked latch supports this.
+
+Electronic logs show the main door was unlocked at 6:42 PM with no subsequent unlocks, ruling out main door entry by an assailant after the resident. Crucially, the front security camera malfunctioned between 7:50 PM – 8:30 PM, creating a critical window for the incident.
+
+**Key Findings & Significance:** A crime likely occurred. The individual was injured in the kitchen. The rear window was used for an exit/escape. The camera malfunction period is highly suspicious. This timeline is vital for determining how the individual was injured, if a crime occurred, and if the scene was altered, particularly regarding who exited via the window.
+
+Report 2:
+--------------------------------------------------------------------------------
+WITNESS REPORT: Alex Carter's credibility is undermined by his claim Jordan was home, directly contradicted by the delivery driver finding no one at 7:55 PM. Alex's belief the window was intact when he left at 6:30 PM is inconsistent with Maya Thompson's testimony.
+
+Maya provides critical details: a "sharp bang" (like glass) around 8:15 PM, followed by a person in a dark hoodie walking quickly away at 8:20 PM. This strongly suggests an incident, possibly forced entry, occurred between 8:15-8:20 PM, after Alex left and before his return.
+
+The delivery driver's objective evidence confirms the house appeared normal externally at 7:55 PM, with the porch light on, but no one answered.
+
+Key inconsistencies point to Alex's unreliable account of Jordan's presence. Maya's timeline of the bang and suspicious person indicates a crime likely occurred around 8:15 PM, potentially involving a window, with a suspect fleeing before Alex's 9:10 PM discovery. The scene was likely altered before Alex's return.
+
+Report 3:
+--------------------------------------------------------------------------------
+TIMELINE REPORT: **Key Timeline Events:**
+
+*   **6:30 PM:** Homeowner Alex Carter leaves, stating Jordan was home and the rear window intact.
+*   **6:42 PM:** Smart door lock logs show the main door was unlocked.
+*   **7:50 PM - 8:30 PM:** Front security camera malfunctions.
+*   **7:55 PM:** Food delivery left at the front door; no answer, porch light on, no visible damage.
+*   **~8:15 PM:** Neighbor Maya Thompson hears a "sharp bang" (like glass breaking).
+*   **~8:20 PM:** Maya sees an individual in a dark hoodie walking quickly away from the house.
+*   **9:10 PM (approx.):** Alex Carter returns, discovers Jordan seriously injured inside, and calls 911.
+*   **Post 9:10 PM:** Jordan transported to hospital, unconscious. Investigators find a disturbed kitchen scene with blood, a tipped chair, a shattered rear window (glass mostly outside, latch unlocked), and a partial shoe impression near the back door.
+
+**Conflicts or Gaps:**
+
+*   **Main Door Unlock:** Who unlocked the main door at 6:42 PM after Alex left?
+*   **Jordan's Status:** If Jordan was home, why didn't they answer the delivery at 7:55 PM?
+*   **Time of Injury:** The exact time and cause of Jordan's injury are unknown, though the "sharp bang" at 8:15 PM aligns with the shattered window.
+*   **Perpetrator Identity:** The identity of the person seen by Maya Thompson is unknown.
+*   **Window Condition:** Alex claims the rear window was intact when leaving, but it was later found shattered with glass primarily outside, suggesting it was broken from within or during an exit.
+*   **Discovery Location:** The initial discovery of Jordan's body location is not specified, conflicting with the kitchen blood evidence.
+
+================================================================================
+INVESTIGATION SUMMARY
+================================================================================
+
+📊 Total Specialist Reports: 3
+🔍 Physical Evidence Analyzed: Yes
+👥 Witness Testimony Reviewed: Yes
+🔗 Leads Identified: Yes
+
+================================================================================
+END OF REPORT
+================================================================================

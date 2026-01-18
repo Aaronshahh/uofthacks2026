@@ -1,6 +1,8 @@
-flask==3.0.0
+﻿flask==3.0.0
 flask-cors==4.0.0
 langchain-google-genai==2.1.12
 langchain-core==0.3.83
 langgraph==0.2.62
 pydantic==2.12.5
+python-dotenv==1.0.0
+openai>=1.59.0

@@ -1,11 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from agents import detective_orchestrator, CaseState
 from RAG.embeddings import EmbeddingService
 from RAG.database import SnowflakeVectorDB
+from image_generator import SurveillanceImageGenerator
 import json
 import os
+import base64
+from pathlib import Path
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
@@ -20,6 +23,11 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
+
+# Image output folder for surveillance frame reconstructions
+IMAGE_OUTPUT_FOLDER = 'outputs/images'
+if not os.path.exists(IMAGE_OUTPUT_FOLDER):
+    os.makedirs(IMAGE_OUTPUT_FOLDER)
 
 
 def allowed_file(filename):
@@ -39,12 +47,13 @@ def analyze_case():
     - wit_test: Witness testimony
     - leads: Leads information
     - evidence_image: (Optional) Image file for RAG retrieval
+    - evidence_images: (Optional) Multiple image files for video reconstruction
     """
     try:
         # Get form data (multipart/form-data for file uploads)
         data = request.form.to_dict()
         
-        # Get evidence image if provided
+        # Get evidence image if provided (single image for RAG)
         evidence_image_bytes = None
         if 'evidence_image' in request.files:
             file = request.files['evidence_image']
@@ -55,6 +64,26 @@ def analyze_case():
                     print(f"✅ Evidence image received: {len(evidence_image_bytes)} bytes")
                 except Exception as e:
                     print(f"⚠️  Error reading evidence image: {str(e)}")
+        
+        # Get multiple evidence images for video reconstruction
+        evidence_images_for_video = []
+        saved_image_paths = []
+        if 'evidence_images' in request.files:
+            files = request.files.getlist('evidence_images')
+            for i, file in enumerate(files):
+                if file and file.filename != '' and allowed_file(file.filename):
+                    try:
+                        image_bytes = file.read()
+                        evidence_images_for_video.append(image_bytes)
+                        # Save to disk for Sora to use
+                        filename = secure_filename(f"video_evidence_{i}_{file.filename}")
+                        filepath = os.path.join(UPLOAD_FOLDER, filename)
+                        with open(filepath, 'wb') as f:
+                            f.write(image_bytes)
+                        saved_image_paths.append(filepath)
+                        print(f"✅ Video evidence image {i+1} saved: {filepath}")
+                    except Exception as e:
+                        print(f"⚠️  Error reading evidence image {i}: {str(e)}")
 
         # Validate required fields
         required_fields = ['Inc_over', 'Targ', 'Phy_Evi', 'wit_test', 'leads']
@@ -102,12 +131,26 @@ def analyze_case():
             # Drop raw bytes from the response to avoid serialization issues
             safe_case_state.pop('evidence_image', None)
 
-        return jsonify({
+        # Generate video reconstruction if images are available
+        video_reconstruction = None
+        if saved_image_paths or evidence_image_bytes:
+            video_reconstruction = generate_video_reconstruction(
+                concluding_report,
+                saved_image_paths if saved_image_paths else None,
+                evidence_image_bytes if not saved_image_paths else None
+            )
+
+        response_data = {
             'success': True,
             'agent_reports': agent_reports,
             'concluding_report': concluding_report,
             'case_state': safe_case_state
-        })
+        }
+        
+        if video_reconstruction:
+            response_data['video_reconstruction'] = video_reconstruction
+
+        return jsonify(response_data)
 
     except Exception as e:
         print(f"❌ Error processing case: {str(e)}")
@@ -166,6 +209,62 @@ def generate_concluding_report(initial_state, agent_reports):
     report_sections.append("=" * 80)
 
     return "\n".join(report_sections)
+
+
+def generate_video_reconstruction(concluding_report, image_paths=None, single_image_bytes=None):
+    """
+    Generate surveillance footage reconstruction using DALL-E images.
+    Creates 5 sequential frames styled as 1990s CCTV footage.
+    
+    Args:
+        concluding_report: The full concluding report text
+        image_paths: List of saved image file paths (not used for surveillance generation)
+        single_image_bytes: Single image bytes (not used for surveillance generation)
+        
+    Returns:
+        Dictionary with image reconstruction results
+    """
+    try:
+        print("\n🎬 Starting surveillance footage reconstruction...")
+        
+        # Check if OpenAI API key is configured
+        if not os.getenv("OPENAI_API_KEY"):
+            print("⚠️ OPENAI_API_KEY not set - skipping reconstruction")
+            return {
+                "status": "skipped",
+                "message": "Reconstruction requires OPENAI_API_KEY",
+                "type": "images",
+                "frames": []
+            }
+        
+        # Generate surveillance frames using DALL-E
+        generator = SurveillanceImageGenerator(output_dir=IMAGE_OUTPUT_FOLDER)
+        result = generator.generate_frames(concluding_report)
+        
+        # Convert local paths to URLs for frontend
+        if result.get("images"):
+            for img in result["images"]:
+                if img.get("path"):
+                    # Convert path to URL
+                    filename = os.path.basename(img["path"])
+                    img["url"] = f"/outputs/images/{filename}"
+        
+        result["type"] = "images"
+        result["frames"] = result.pop("images", [])
+        
+        print(f"✅ Surveillance reconstruction complete: {result.get('status')}")
+        return result
+        
+    except Exception as e:
+        print(f"❌ Reconstruction failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {
+            "status": "failed",
+            "message": str(e),
+            "type": "images",
+            "frames": []
+        }
 
 
 @app.route('/api/upload-footprint', methods=['POST'])
@@ -304,6 +403,81 @@ def upload_footprint():
         return jsonify({
             'success': False,
             'error': f'Failed to upload footprint: {str(e)}'
+        }), 500
+
+
+@app.route('/outputs/images/<path:filename>')
+def serve_image(filename):
+    """Serve generated surveillance images"""
+    return send_from_directory(IMAGE_OUTPUT_FOLDER, filename)
+
+
+@app.route('/api/generate-reconstruction', methods=['POST'])
+def generate_reconstruction_standalone():
+    """
+    Generate surveillance reconstruction from hardcoded demo files.
+    Uses message.txt as the police report.
+    
+    In the future, this will be connected to uploaded case files.
+    """
+    try:
+        print("\n🎬 Starting standalone surveillance reconstruction...")
+        
+        # Check if OpenAI API key is configured
+        if not os.getenv("OPENAI_API_KEY"):
+            return jsonify({
+                "success": False,
+                "error": "OPENAI_API_KEY not set. Please configure it in your .env file."
+            }), 400
+        
+        # Use hardcoded demo file
+        report_path = Path("footwear_rag/data/zip_files/message.txt")
+        
+        if not report_path.exists():
+            return jsonify({
+                "success": False,
+                "error": f"Demo report file not found: {report_path}"
+            }), 404
+        
+        # Read the report
+        with open(report_path, 'r', encoding='utf-8') as f:
+            report_text = f.read()
+        
+        print(f"📄 Loaded report: {len(report_text)} characters")
+        
+        # Generate surveillance frames
+        generator = SurveillanceImageGenerator(output_dir=IMAGE_OUTPUT_FOLDER)
+        result = generator.generate_frames(report_text)
+        
+        # Convert local paths to URLs for frontend
+        if result.get("images"):
+            for img in result["images"]:
+                if img.get("path"):
+                    filename = os.path.basename(img["path"])
+                    img["url"] = f"/outputs/images/{filename}"
+        
+        # Restructure response
+        response_data = {
+            "success": True,
+            "data": {
+                "status": result.get("status", "failed"),
+                "total": result.get("total", 0),
+                "completed": result.get("completed", 0),
+                "failed": result.get("failed", 0),
+                "frames": result.get("images", [])
+            }
+        }
+        
+        print(f"✅ Reconstruction complete: {result.get('completed', 0)}/{result.get('total', 0)} frames")
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"❌ Reconstruction failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": str(e)
         }), 500
 
 

@@ -15,7 +15,11 @@
     </div>
 
     <div class="analysis-container">
-        <a href="index.html" class="back-btn">← Back to Evidence Upload</a>
+        <nav class="nav-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;">
+            <a href="index.html" style="padding: 10px 20px; background: transparent; border: 1px solid #333; border-radius: 6px; color: #888; font-size: 13px; text-decoration: none; transition: all 0.2s;">Evidence Upload</a>
+            <a href="case-analysis.html" style="padding: 10px 20px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; border-radius: 6px; color: #3b82f6; font-size: 13px; text-decoration: none;">Case Analysis</a>
+            <a href="reconstruction.html" style="padding: 10px 20px; background: transparent; border: 1px solid #333; border-radius: 6px; color: #888; font-size: 13px; text-decoration: none; transition: all 0.2s;">Reconstruction</a>
+        </nav>
 
         <div class="analysis-form">
             <h2>Submit Case for Analysis</h2>
@@ -72,7 +76,29 @@
                 </div>
 
                 <div class="form-section">
+<<<<<<< HEAD
                     <label for="witnessTestimony">👥 Witness Statements *</label>
+=======
+                    <label for="evidenceImages">🎬 Scene Images (Optional - for Video Reconstruction)</label>
+                    <input
+                        type="file"
+                        id="evidenceImages"
+                        name="evidence_images"
+                        accept="image/png,image/jpeg,image/jpg,image/gif"
+                        multiple
+                        style="padding: 8px; cursor: pointer;"
+                    >
+                    <small style="color: #aaa; display: block; margin-top: 5px;">
+                        Upload scene images in chronological order (beginning, middle, end) for AI video reconstruction
+                    </small>
+                    <div id="sceneImagesPreview" style="margin-top: 10px; display: none;">
+                        <div id="sceneImagesList" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label for="witnessTestimony">👥 Witness Testimony *</label>
+>>>>>>> caeea02de2b2e2a017cda7bdea6c112376bbd1a4
                     <textarea
                         id="witnessTestimony"
                         name="wit_test"
@@ -116,6 +142,15 @@
                 <h2>🎯 Summary Report</h2>
                 <pre id="concludingReport"></pre>
             </div>
+
+            <div class="surveillance-reconstruction" id="reconstructionContainer" style="display: none;">
+                <div class="storyboard-header">
+                    <h2>🎬 RECONSTRUCTED SURVEILLANCE FOOTAGE</h2>
+                    <div class="storyboard-subtitle">Isabella Stewart Gardner Museum - March 18, 1990</div>
+                </div>
+                <div id="reconstructionStatus" class="reconstruction-status"></div>
+                <div id="storyboardFrames" class="storyboard-grid"></div>
+            </div>
         </div>
     </div>
 
@@ -130,8 +165,14 @@
         const evidenceImageInput = document.getElementById('evidenceImage');
         const imagePreview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
+        const evidenceImagesInput = document.getElementById('evidenceImages');
+        const sceneImagesPreview = document.getElementById('sceneImagesPreview');
+        const sceneImagesList = document.getElementById('sceneImagesList');
+        const reconstructionContainer = document.getElementById('reconstructionContainer');
+        const reconstructionStatus = document.getElementById('reconstructionStatus');
+        const storyboardFrames = document.getElementById('storyboardFrames');
 
-        // Image preview handler
+        // Image preview handler for single RAG image
         evidenceImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -143,6 +184,30 @@
                 reader.readAsDataURL(file);
             } else {
                 imagePreview.style.display = 'none';
+            }
+        });
+
+        // Scene images preview handler for video reconstruction
+        evidenceImagesInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                sceneImagesList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.cssText = 'text-align: center;';
+                        imgContainer.innerHTML = `
+                            <img src="${event.target.result}" style="max-width: 150px; max-height: 150px; border: 2px solid #3b82f6; border-radius: 5px;">
+                            <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Scene ${index + 1}</div>
+                        `;
+                        sceneImagesList.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                sceneImagesPreview.style.display = 'block';
+            } else {
+                sceneImagesPreview.style.display = 'none';
             }
         });
 
@@ -165,11 +230,20 @@
             formData.append('wit_test', document.getElementById('witnessTestimony').value);
             formData.append('leads', document.getElementById('leads').value);
 
-            // Add evidence image if provided
+            // Add evidence image if provided (for RAG)
             const imageFile = evidenceImageInput.files[0];
             if (imageFile) {
                 formData.append('evidence_image', imageFile);
                 console.log('Evidence image attached:', imageFile.name);
+            }
+
+            // Add scene images for video reconstruction
+            const sceneFiles = evidenceImagesInput.files;
+            if (sceneFiles.length > 0) {
+                Array.from(sceneFiles).forEach((file, index) => {
+                    formData.append('evidence_images', file);
+                    console.log(`Scene image ${index + 1} attached:`, file.name);
+                });
             }
 
             try {
@@ -213,6 +287,11 @@
                     // Display concluding report
                     concludingReport.textContent = result.concluding_report;
 
+                    // Display surveillance reconstruction if available
+                    if (result.video_reconstruction) {
+                        displaySurveillanceReconstruction(result.video_reconstruction);
+                    }
+
                     // Show results
                     loadingIndicator.classList.remove('active');
                     resultsContainer.classList.add('active');
@@ -240,6 +319,109 @@
                 analyzeBtn.disabled = false;
             }
         });
+
+        // Display surveillance footage reconstruction as storyboard
+        function displaySurveillanceReconstruction(reconstruction) {
+            reconstructionContainer.style.display = 'block';
+            
+            const status = reconstruction.status || 'failed';
+            const statusColors = {
+                'complete': '#10b981',
+                'partial': '#f59e0b',
+                'failed': '#ef4444',
+                'skipped': '#6b7280'
+            };
+            
+            // Status indicator
+            reconstructionStatus.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <span class="rec-indicator ${status === 'complete' ? 'recording' : ''}"></span>
+                    <span style="color: ${statusColors[status]}; font-weight: 600; font-family: 'Courier New', monospace;">
+                        ${status === 'complete' ? 'FOOTAGE RECOVERED' : status.toUpperCase()}
+                    </span>
+                    <span style="color: #666; margin-left: auto; font-family: 'Courier New', monospace; font-size: 12px;">
+                        ${reconstruction.completed || 0}/${reconstruction.total || 5} FRAMES
+                    </span>
+                </div>
+            `;
+            
+            // Clear and build storyboard
+            storyboardFrames.innerHTML = '';
+            
+            const frames = reconstruction.frames || [];
+            
+            if (frames.length > 0) {
+                frames.forEach((frame, index) => {
+                    const frameCard = document.createElement('div');
+                    frameCard.className = 'storyboard-frame';
+                    frameCard.style.animationDelay = `${index * 0.15}s`;
+                    
+                    if (frame.status === 'complete' && frame.url) {
+                        frameCard.innerHTML = `
+                            <div class="frame-header">
+                                <span class="cam-label">${frame.camera || 'CAM 0' + (index + 1)}</span>
+                                <span class="rec-dot"></span>
+                                <span class="rec-label">REC</span>
+                            </div>
+                            <div class="frame-image-container">
+                                <img src="${frame.url}" alt="${frame.camera}" class="frame-image" onclick="openLightbox(this.src, '${frame.camera}', '${frame.timestamp || ''}', '${(frame.description || '').replace(/'/g, "\\'")}')">
+                                <div class="scanlines"></div>
+                            </div>
+                            <div class="frame-footer">
+                                <span class="timestamp">${frame.timestamp || 'MAR 18 1990'}</span>
+                            </div>
+                            <div class="frame-description">${frame.description || ''}</div>
+                        `;
+                    } else {
+                        frameCard.innerHTML = `
+                            <div class="frame-header">
+                                <span class="cam-label">CAM 0${index + 1}</span>
+                                <span class="error-indicator">ERROR</span>
+                            </div>
+                            <div class="frame-error">
+                                <span style="font-size: 32px; opacity: 0.5;">📡</span>
+                                <p>SIGNAL LOST</p>
+                                <small>${frame.error || 'Frame generation failed'}</small>
+                            </div>
+                        `;
+                    }
+                    
+                    storyboardFrames.appendChild(frameCard);
+                });
+            } else {
+                storyboardFrames.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                        <span style="font-size: 48px; opacity: 0.3;">📹</span>
+                        <p style="margin-top: 15px; font-family: 'Courier New', monospace;">NO FOOTAGE AVAILABLE</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Lightbox for full-size image viewing
+        function openLightbox(src, camera, timestamp, description) {
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <div class="lightbox-header">
+                        <span class="cam-label">${camera}</span>
+                        <span class="rec-dot"></span>
+                        <span class="rec-label">REC</span>
+                        <span class="lightbox-close" onclick="this.closest('.lightbox').remove()">&times;</span>
+                    </div>
+                    <img src="${src}" alt="${camera}">
+                    <div class="lightbox-footer">
+                        <span class="timestamp">${timestamp}</span>
+                        <p class="lightbox-description">${description}</p>
+                    </div>
+                </div>
+            `;
+            lightbox.onclick = (e) => {
+                if (e.target === lightbox) lightbox.remove();
+            };
+            document.body.appendChild(lightbox);
+        }
     </script>
 </body>
 </html>
