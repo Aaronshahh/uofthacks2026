@@ -4,8 +4,6 @@ from werkzeug.utils import secure_filename
 from agents import detective_orchestrator, CaseState
 from RAG.embeddings import EmbeddingService
 from RAG.database import SnowflakeVectorDB
-from scene_parser import SceneParser
-from sora_service import SoraVideoService
 from image_generator import SurveillanceImageGenerator
 import json
 import os
@@ -25,11 +23,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
-
-# Video output folder for Sora reconstructions
-VIDEO_OUTPUT_FOLDER = 'outputs/videos'
-if not os.path.exists(VIDEO_OUTPUT_FOLDER):
-    os.makedirs(VIDEO_OUTPUT_FOLDER)
 
 # Image output folder for surveillance frame reconstructions
 IMAGE_OUTPUT_FOLDER = 'outputs/images'
@@ -486,12 +479,6 @@ def generate_reconstruction_standalone():
             "success": False,
             "error": str(e)
         }), 500
-
-
-@app.route('/outputs/videos/<path:filename>')
-def serve_video(filename):
-    """Serve generated videos"""
-    return send_from_directory(VIDEO_OUTPUT_FOLDER, filename)
 
 
 @app.route('/health', methods=['GET'])
