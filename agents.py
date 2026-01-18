@@ -177,6 +177,14 @@ def sketch_artist_node(state: CaseState):
     3. Clothing and accessories
     4. Any unique identifiers or distinguishing characteristics
     
+    IMPORTANT: You MUST provide specific estimates for ALL physical attributes:
+    - Height: Provide a specific range (e.g., "5'9\" - 5'11\"" or "approximately 6'0\"")
+    - Weight: Provide a specific range (e.g., "170-185 lbs" or "approximately 180 lbs")
+    - Age: Provide a specific range (e.g., "35-45 years old")
+    - Build: Describe specifically (athletic, stocky, slim, medium, etc.)
+    
+    If witness testimony is vague or missing details, use your professional judgment to provide reasonable estimates based on context clues, typical profiles, and investigative experience. Present all estimates confidently as part of your professional assessment.
+    
     Focus only on suspect descriptions. Ignore other details."""
     
     response = llm.invoke(prompt)
