@@ -2,7 +2,7 @@
   "criminals": [
     {
       "id": "CR-001",
-      "name": "Marcus "The Ghost" Rivera",
+      "name": "Marcus 'The Ghost' Rivera",
       "age": 42,
       "gender": "M",
       "location": "Boston, MA",
@@ -17,7 +17,7 @@
     },
     {
       "id": "CR-002",
-      "name": "Anthony "Tony" Deluca",
+      "name": "Anthony 'Tony' Deluca",
       "age": 38,
       "gender": "M",
       "location": "Providence, RI",
@@ -47,7 +47,7 @@
     },
     {
       "id": "CR-004",
-      "name": "Robert "Bobby Fingers" Malone",
+      "name": "Robert 'Bobby Fingers' Malone",
       "age": 55,
       "gender": "M",
       "location": "South Boston, MA",
@@ -77,7 +77,7 @@
     },
     {
       "id": "CR-006",
-      "name": "James "Jimmy" O'Brien",
+      "name": "James 'Jimmy' O'Brien",
       "age": 45,
       "gender": "M",
       "location": "Charlestown, MA",
@@ -122,7 +122,7 @@
     },
     {
       "id": "CR-009",
-      "name": "Frank "The Fence" Castellano",
+      "name": "Frank 'The Fence' Castellano",
       "age": 62,
       "gender": "M",
       "location": "Newark, NJ",
