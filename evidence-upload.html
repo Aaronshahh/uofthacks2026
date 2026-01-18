@@ -10,16 +10,36 @@
     <div class="header">
         <div class="header-content">
             <h1>🗁 Anchor</h1>
-            <p class="subtitle">Evidence Upload</p>
+            <p class="subtitle">Evidence Database</p>
         </div>
     </div>
 
     <div class="container">
         <div class="main-content" style="max-width: 800px; margin: 40px auto;">
-             <a href="index.html" class="back-btn">← Back to Home</a>
+            <nav class="nav-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;">
+                <a href="index.html" style="padding: 10px 20px; background: transparent; border: 1px solid #333; border-radius: 6px; color: #888; font-size: 13px; text-decoration: none; transition: all 0.2s;">Home</a>
+                <a href="evidence-upload.html" style="padding: 10px 20px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; border-radius: 6px; color: #3b82f6; font-size: 13px; text-decoration: none;">Evidence Database</a>
+                <a href="case-analysis.html" style="padding: 10px 20px; background: transparent; border: 1px solid #333; border-radius: 6px; color: #888; font-size: 13px; text-decoration: none; transition: all 0.2s;">Case Analysis</a>
+                <a href="reconstruction.html" style="padding: 10px 20px; background: transparent; border: 1px solid #333; border-radius: 6px; color: #888; font-size: 13px; text-decoration: none; transition: all 0.2s;">Reconstruction</a>
+            </nav>
 
             <div class="upload-section">
-                <h2>Upload Evidence</h2>
+                <h2>🗄️ Add Evidence to Vector Database</h2>
+                <p style="color: #888; margin-bottom: 25px; font-size: 14px; line-height: 1.6;">
+                    Upload forensic evidence to expand the knowledge base used by AI expert agents. 
+                    Evidence is embedded and stored in Snowflake vector databases for intelligent retrieval during case analysis.
+                </p>
+                
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 18px;">🧠</span>
+                        <span style="color: #3b82f6; font-weight: 600; font-size: 13px;">HOW IT WORKS</span>
+                    </div>
+                    <p style="color: #aaa; font-size: 13px; margin: 0; line-height: 1.5;">
+                        Uploaded evidence is processed through embedding models and stored in vector databases. 
+                        When analyzing cases, AI agents query this database to find matching evidence and patterns.
+                    </p>
+                </div>
                 
                 <div class="evidence-form">
                     <div class="form-group">
