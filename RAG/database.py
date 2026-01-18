@@ -36,7 +36,7 @@ class SnowflakeVectorDB:
     - Top-k retrieval for RAG queries
     """
     
-    TABLE_NAME = "footprint_vectors"
+    TABLE_NAME = "FOOTPRINT_VECTORS"
     VECTOR_DIMENSION = 512  # Must match the dimension in the database
     
     def __init__(self, config: Optional[SnowflakeConfig] = None):
