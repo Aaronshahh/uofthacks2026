@@ -1,9 +1,20 @@
 from typing import TypedDict, Annotated, List, Optional
 import operator
+import json
 from langchain_openai import ChatOpenAI
 import os
 from langgraph.graph import StateGraph, END
 from RAG.rag_query import RAGQueryService, format_cases_for_display
+
+# Load criminal database
+CRIMINAL_DB_PATH = os.path.join(os.path.dirname(__file__), 'criminal_database.json')
+try:
+    with open(CRIMINAL_DB_PATH, 'r', encoding='utf-8') as f:
+        CRIMINAL_DATABASE = json.load(f)
+    print(f"✅ Criminal database loaded: {len(CRIMINAL_DATABASE.get('criminals', []))} suspects")
+except Exception as e:
+    print(f"⚠️ Failed to load criminal database: {e}")
+    CRIMINAL_DATABASE = {"criminals": []}
 
 # Load environment variables from .env file if it exists
 try:
@@ -217,6 +228,73 @@ def timeline_agent_node(state: CaseState):
     return {"agent_reports": [f"TIMELINE REPORT: {report_text}"]}
 
 
+def suspect_matcher_node(state: CaseState):
+    """
+    Final agent that matches case findings against the criminal database
+    to identify potential suspects with confidence percentages.
+    """
+    # Compile all agent reports into a single context
+    all_reports = "\n\n".join(state.get("agent_reports", []))
+    
+    # Format criminal database for the prompt
+    criminals_info = json.dumps(CRIMINAL_DATABASE.get("criminals", []), indent=2)
+    
+    prompt = f"""You are a criminal profiler and suspect identification specialist.
+
+Your task is to analyze all the case findings and match them against known criminals in the database to identify the TOP 5 most likely suspects.
+
+=== CASE FINDINGS ===
+Incident Overview: {state['Inc_over']}
+Physical Evidence: {state['Phy_Evi']}
+Witness Testimony: {state['wit_test']}
+Leads: {state['leads']}
+
+=== AGENT ANALYSIS REPORTS ===
+{all_reports}
+
+=== CRIMINAL DATABASE ===
+{criminals_info}
+
+=== YOUR TASK ===
+Based on ALL available evidence and analysis, identify the TOP 5 POTENTIAL SUSPECTS from the criminal database.
+
+For each suspect, provide:
+1. Name and ID
+2. Confidence percentage (0-100%)
+3. Key matching factors (what evidence/patterns link them to this case)
+4. Risk assessment (why they should be investigated)
+
+Format your response EXACTLY like this:
+
+🎯 POTENTIAL SUSPECTS ANALYSIS
+
+1. [NAME] (ID: [CR-XXX]) - CONFIDENCE: [XX]%
+   Matching Factors: [List key evidence that matches]
+   Risk Assessment: [Brief explanation]
+
+2. [NAME] (ID: [CR-XXX]) - CONFIDENCE: [XX]%
+   Matching Factors: [List key evidence that matches]
+   Risk Assessment: [Brief explanation]
+
+[Continue for all 5 suspects, ranked by confidence]
+
+📊 INVESTIGATION PRIORITY: [Summarize top recommendation in 1-2 sentences]
+
+Be analytical and objective. Base confidence on actual evidence matches, not speculation."""
+
+    response = llm.invoke(prompt)
+    report_text = response.content if hasattr(response, 'content') else str(response)
+    
+    # Print to console with emphasis
+    print(f"\n{'='*60}")
+    print(f"🎯 SUSPECT MATCHER REPORT")
+    print(f"{'='*60}")
+    print(report_text)
+    print(f"{'='*60}\n")
+    
+    return {"agent_reports": [f"SUSPECT ANALYSIS REPORT:\n{report_text}"]}
+
+
 # 1. Initialize the Graph using your CaseState structure
 builder = StateGraph(CaseState)
 
@@ -226,6 +304,7 @@ builder.add_node("physical_analysis", physical_evidence_node)
 builder.add_node("witness_analysis", witness_agent_node)
 builder.add_node("sketch_artist", sketch_artist_node)
 builder.add_node("timeline_reconstruction", timeline_agent_node)
+builder.add_node("suspect_matcher", suspect_matcher_node)
 
 # 3. Define the Flow (The "Relay Race")
 # This tells the system where to start and who to pass the folder to next.
@@ -234,10 +313,11 @@ builder.set_entry_point("physical_analysis")
 builder.add_edge("physical_analysis", "witness_analysis")
 builder.add_edge("witness_analysis", "sketch_artist")
 builder.add_edge("sketch_artist", "timeline_reconstruction")
+builder.add_edge("timeline_reconstruction", "suspect_matcher")
 
 # 4. Define the Exit
-# After the timeline is done, the case is "closed."
-builder.add_edge("timeline_reconstruction", END)
+# After suspect matching is done, the case is "closed."
+builder.add_edge("suspect_matcher", END)
 
 # 5. Compile the Graph
 # This creates the 'runnable' object you will call from your frontend.
