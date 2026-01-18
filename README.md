@@ -1,191 +1,114 @@
-# Detective Evidence System - Snowflake Setup
+# 🚀 AI Detective Case Analysis System
 
-## 🚀 Quick Start (Works for Everyone!)
+## Overview
 
-```bash
-# 1. Install dependencies
-npm install
+An AI-powered forensic investigation system that uses four specialized agents to analyze case evidence and generate comprehensive investigative reports. Upload footprint evidence, submit case details, and receive automated analysis from Physical Evidence, Witness Testimony, Sketch Artist, and Timeline Reconstruction agents.
 
-# 2. Start the server (no credentials needed!)
-npm start
+## How It Works
 
-# 3. Open the app
-open index.html
+1. **Upload Footprint Evidence** (optional)
+   - Upload footprint image with ID, gender, brand, model, and size
+   - Image is converted to 512-dimension vector embedding
+   - Stored in Snowflake database for future RAG retrieval
+
+2. **Submit Case Details**
+   - Provide incident overview, suspect information, physical evidence, witness testimony, and leads
+   - Optionally attach evidence image for RAG retrieval
+
+3. **LangGraph Orchestration**
+   - Four agents execute in sequence on case data
+   - Each agent analyzes specific aspect and generates report
+   - Results aggregated into final comprehensive report
+
+4. **Review Reports**
+   - Physical Evidence Report (with similar case references)
+   - Witness Testimony Report
+   - Sketch Artist Report (suspect description)
+   - Timeline Report
+   - Concluding Report with investigation summary
+
+## 🔄 Multi-Agent Orchestration Flow
+
+```mermaid
+graph TD
+    Start([Case Data Input]) --> PhysEvi["<b>🔬 Physical Evidence Agent</b><br/>Analyzes forensic findings<br/>Queries RAG for similar cases"]
+    
+    PhysEvi --> WitAgent["<b>👥 Witness Testimony Agent</b><br/>Evaluates witness statements<br/>Identifies inconsistencies"]
+    
+    WitAgent --> SketchArt["<b>🎨 Sketch Artist Agent</b><br/>Extracts suspect descriptions<br/>Organizes physical features"]
+    
+    SketchArt --> TimelineAgent["<b>⏰ Timeline Reconstruction Agent</b><br/>Reconstructs event sequence<br/>Identifies conflicts & gaps"]
+    
+    TimelineAgent --> Conclude["<b>📊 Concluding Report Generator</b><br/>Aggregates all findings<br/>Creates formatted output"]
+    
+    Conclude --> End([Final Report])
+    
+    style Start fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+    style PhysEvi fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style WitAgent fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style SketchArt fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style TimelineAgent fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style Conclude fill:#f5576c,stroke:#333,stroke-width:2px,color:#fff
+    style End fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
 ```
 
-**That's it!** The system runs in **LOCAL MODE** by default. No Snowflake account required!
+## 🗄️ Evidence Upload & RAG Integration
 
----
-
-## 🎯 Two Operating Modes
-
-### 📝 Local Mode (Default - No Setup)
-- ✅ Works immediately for all team members
-- ✅ No Snowflake credentials required
-- ✅ Evidence stored in local files
-- ✅ Perfect for development and testing
-
-### ❄️ Snowflake Mode (Optional - Per Person)
-- 🔐 Each person uses their own Snowflake account
-- ☁️ Evidence stored in Snowflake database
-- 🔄 Seamlessly falls back to local mode if connection fails
-
----
-
-## 🔧 Enable Snowflake (Optional)
-
-**Only if you have a Snowflake account:**
-
-### 1. Add your credentials to `.env`
-
-The `.env` file already exists. Just fill in your credentials:
-
-```env
-SNOWFLAKE_ACCOUNT=your_account.region
-SNOWFLAKE_USERNAME=your_username
-SNOWFLAKE_PASSWORD=your_password
+```mermaid
+graph LR
+    Upload["<b>📁 Upload Footprint</b><br/>ID, Gender, Brand,<br/>Model, Size, Image"]
+    
+    Upload --> Embed["<b>🔀 Embedding Generation</b><br/>Image → 512-dim Vector"]
+    
+    Embed --> DB["<b>🗄️ Snowflake Database</b><br/>Vector + Metadata Storage"]
+    
+    Analysis["<b>Case Analysis</b><br/>Physical Evidence Agent"]
+    
+    Analysis --> RAG["<b>🔍 RAG Query</b><br/>Find Top-3 Similar Cases"]
+    
+    DB -.->|Vector Search| RAG
+    
+    RAG --> Report["<b>📊 Enhanced Report</b><br/>With Similar Cases Context"]
+    
+    style Upload fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+    style Embed fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style DB fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+    style Analysis fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
+    style RAG fill:#f5576c,stroke:#333,stroke-width:2px,color:#fff
+    style Report fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
 ```
 
-**Finding your account identifier:**
-- Log into Snowflake
-- Look at the URL: `https://[ACCOUNT].snowflakecomputing.com`
-- Example: `ab12345.us-east-1` or `orgname-accountname`
+## 📊 Expected Report Output
 
-### 2. Restart the server
+**Physical Evidence Report**
+- Forensic findings analysis
+- Evidence significance and implications
+- Similar case references from database
+- Cross-references with incident context
 
-```bash
-npm start
-```
+**Witness Testimony Report**
+- Statement credibility assessment
+- Consistency and inconsistencies
+- Conflicts with case context
+- Key observations and uncertainties
 
-You'll see: ✅ SNOWFLAKE MODE: Evidence will be stored in Snowflake
+**Sketch Artist Report**
+- Suspect physical description
+- Height, build, age, race/ethnicity
+- Facial features and distinguishing marks
+- Clothing and accessories
+- Unique identifiers
 
----
+**Timeline Report**
+- Chronological event sequence
+- Time-stamped key events
+- Logical conflicts and gaps
+- Missing time windows
+- Event correlations
 
-## 🤝 Team Collaboration
-
-### How It Works:
-1. **.env is NOT committed** to git (protected by .gitignore)
-2. Each person configures their own `.env` locally
-3. Some team members use Snowflake, others use local mode
-4. Everyone commits code normally
-
-### What's Shared:
-- ✅ `.env.example` - Template file (no secrets)
-- ✅ Source code - All `.js`, `.html`, `.css` files
-- ✅ `package.json` - Dependencies
-- ✅ Documentation
-
-### What's Private:
-- 🔒 `.env` - Your personal credentials (NEVER commit!)
-- 🔒 `node_modules/` - Dependencies (auto-generated)
-- 🔒 `uploads/` - Uploaded files
-
----
-
-## 📊 When to Use Each Mode
-
-### Use Local Mode When:
-- 🧪 Testing and development
-- 🎓 You don't have Snowflake access
-- ⚡ You want quick setup
-- 🔌 Working offline
-
-### Use Snowflake Mode When:
-- ☁️ You need cloud storage
-- 🔍 You want to query data in SQL
-- 👥 Sharing data with your Snowflake team
-- 📈 Production deployment
-
----
-
-## 🛡️ Security Best Practices
-
-### ✅ DO:
-- Keep your `.env` file LOCAL
-- Use your own Snowflake credentials
-- Commit `.env.example` (no secrets)
-- Share this README with teammates
-
-### ❌ DON'T:
-- **Never commit `.env`** to git
-- Don't share passwords in chat/email
-- Don't hardcode credentials in code
-- Don't use someone else's account
-
----
-
-## 🧪 Testing Both Modes
-
-### Test Local Mode:
-```bash
-# Clear credentials in .env
-SNOWFLAKE_ACCOUNT=
-SNOWFLAKE_USERNAME=
-SNOWFLAKE_PASSWORD=
-
-# Restart
-npm start
-```
-
-### Test Snowflake Mode:
-```bash
-# Add credentials in .env
-SNOWFLAKE_ACCOUNT=your_account
-SNOWFLAKE_USERNAME=your_username
-SNOWFLAKE_PASSWORD=your_password
-
-# Restart
-npm start
-```
-
----
-
-## 📋 Snowflake Table Structure
-
-When using Snowflake mode, this table is auto-created:
-
-```sql
-CREATE TABLE FORENSIC_EVIDENCE (
-    EVIDENCE_ID NUMBER AUTOINCREMENT PRIMARY KEY,
-    CASE_NUMBER VARCHAR(100),
-    DESCRIPTION TEXT,
-    COLLECTED_BY VARCHAR(200),
-    DATE_COLLECTED DATE,
-    TIME_COLLECTED TIME,
-    LOCATION VARCHAR(500),
-    FILE_NAMES TEXT,
-    FILE_COUNT NUMBER,
-    SUBMITTED_AT TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
-    METADATA VARIANT
-)
-```
-
----
-
-## 🆘 Troubleshooting
-
-**"I don't have Snowflake credentials"**
-- No problem! Just use local mode (default)
-
-**"Server won't start"**
-- Make sure port 3000 isn't in use
-- Run `npm install` first
-
-**"Snowflake connection failed"**
-- Server automatically falls back to local mode
-- Check your credentials in `.env`
-- Verify your Snowflake account is active
-
-**"My teammate can't run the app"**
-- Make sure they run `npm install`
-- They don't need Snowflake credentials
-- App works in local mode by default
-
----
-
-## 📚 Additional Documentation
-
-- **TEAM_SETUP.md** - Detailed team collaboration guide
-- **.env.example** - Configuration template with comments
-
-Need help? The server will show clear messages about which mode it's running in!
+**Concluding Report**
+- Case overview summary
+- Target information
+- Aggregated findings from all agents
+- Investigation statistics
+- Total reports generated
