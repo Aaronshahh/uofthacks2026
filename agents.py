@@ -97,6 +97,37 @@ def witness_agent_node(state: CaseState):
     return {"agent_reports": [f"WITNESS REPORT: {report_text}"]}
 
 
+def sketch_artist_node(state: CaseState):
+    """
+    Sketch artist agent that extracts suspect descriptions from witness testimonies.
+    """
+    witnesses = state["wit_test"]
+    
+    prompt = f"""You are a police sketch artist. Analyze witness testimonies and extract CONCISE physical descriptions of the suspect (max 200 words).
+
+    Witness Testimony: {witnesses}
+
+    Extract and organize:
+    1. Physical features (height, build, age, race/ethnicity)
+    2. Facial features (eyes, nose, hair, facial hair, distinctive marks)
+    3. Clothing and accessories
+    4. Any unique identifiers or distinguishing characteristics
+    
+    Focus only on suspect descriptions. Ignore other details."""
+    
+    response = llm.invoke(prompt)
+    report_text = response.content if hasattr(response, 'content') else str(response)
+    
+    # Print to console
+    print(f"\n{'='*60}")
+    print(f"SKETCH ARTIST REPORT")
+    print(f"{'='*60}")
+    print(report_text)
+    print(f"{'='*60}\n")
+    
+    return {"agent_reports": [f"SKETCH ARTIST REPORT: {report_text}"]}
+
+
 def timeline_agent_node(state: CaseState):
     """
     Expert agent focused on reconstructing the chronological order of events.
@@ -130,6 +161,7 @@ builder = StateGraph(CaseState)
 # The first string is the "Name" of the room, the second is the function you wrote.
 builder.add_node("physical_analysis", physical_evidence_node)
 builder.add_node("witness_analysis", witness_agent_node)
+builder.add_node("sketch_artist", sketch_artist_node)
 builder.add_node("timeline_reconstruction", timeline_agent_node)
 
 # 3. Define the Flow (The "Relay Race")
@@ -137,7 +169,8 @@ builder.add_node("timeline_reconstruction", timeline_agent_node)
 builder.set_entry_point("physical_analysis")
 
 builder.add_edge("physical_analysis", "witness_analysis")
-builder.add_edge("witness_analysis", "timeline_reconstruction")
+builder.add_edge("witness_analysis", "sketch_artist")
+builder.add_edge("sketch_artist", "timeline_reconstruction")
 
 # 4. Define the Exit
 # After the timeline is done, the case is "closed."
