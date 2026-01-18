@@ -69,7 +69,12 @@ def physical_evidence_node(state: CaseState):
     
     print(f"\n--- RAG Context ---\n{rag_context}\n-------------------\n")
 
-    prompt = f"""You are a forensic scientist. Provide a CONCISE analysis (max 200 words).
+    prompt = f"""You are a forensic evidence specialist assisting an investigation team.
+Your role is to analyze physical evidence objectively and conservatively,
+mirroring real-world forensic practice.
+
+Provide a CONCISE analysis (max 200 words). Do NOT speculate beyond the data provided.
+Do NOT assert guilt, motive, or causality.
 
     Physical Evidence: {state['Phy_Evi']}
     Case Context: {state['Inc_over']}
@@ -77,7 +82,16 @@ def physical_evidence_node(state: CaseState):
     Similar Cases from Database:
     {rag_context if rag_context else 'No similar cases found in database.'}
 
-    Focus on: Key findings, significance, connections to the case, and how this evidence compares to similar historical cases."""
+    Your analysis should include:
+- Observable forensic characteristics and measurable details
+- Forensic significance and limitations of the evidence
+- Notable consistencies or inconsistencies with the case context
+- High-level comparison to similar historical cases (if provided)
+- Clear separation between direct observations and inferred possibilities
+
+When referencing historical cases, explicitly indicate that they are comparative, not determinative.
+Maintain traceability to the provided inputs.     
+"""
     response = llm.invoke(prompt)
     report_text = response.content if hasattr(response, 'content') else str(response)
     return {"agent_reports": [f"PHYSICAL EVIDENCE REPORT: {report_text}"]}
@@ -86,12 +100,29 @@ def physical_evidence_node(state: CaseState):
 
 def witness_agent_node(state: CaseState):
     # Logic for Witness Testimony Agent
-    prompt = f"""Analyze witness statements CONCISELY (max 200 words).
+    prompt = f"""
+    You are an investigative analyst specializing in witness testimony evaluation.
+    Your role is to assess statements objectively, without assuming intent, truthfulness, or deception.
 
+    Provide a CONCISE analysis (max 200 words).
+    Do NOT assert guilt, motive, or factual certainty.
+    Avoid psychological speculation beyond observable statement characteristics.
     Witness Testimony: {state['wit_test']}
     Case Context: {state['Inc_over']}
 
-    Focus on: Credibility, inconsistencies, and key details."""
+    Your analysis should address:
+    - Consistencies and inconsistencies across witness statements
+    - Alignment or conflicts with known case context
+    - Clarity, specificity, and temporal coherence of accounts
+    - Potential sources of uncertainty (e.g., timing, vantage point, stress, second-hand information)
+
+    Clearly distinguish between:
+    - Directly stated observations
+    - Uncertainties or contradictions
+    - Analytical notes for follow-up investigation
+
+    Maintain neutral, professional language suitable for investigative review.
+    """
     response = llm.invoke(prompt)
     report_text = response.content if hasattr(response, 'content') else str(response)
     return {"agent_reports": [f"WITNESS REPORT: {report_text}"]}
@@ -137,16 +168,32 @@ def timeline_agent_node(state: CaseState):
     witnesses = state["wit_test"]
     evidence = state["Phy_Evi"]
 
-    prompt = f"""Create a CONCISE timeline (max 200 words).
+    prompt = f"""
+
+    You are an investigative timeline analyst responsible for reconstructing the chronological sequence of events in a case.
+
+    Your task is to organize events objectively based only on the provided information.
+    Do NOT infer intent, motive, or causality beyond explicit statements.
+
+    Provide a CONCISE timeline analysis (max 200 words).
 
     Incident: {overview}
     Witnesses: {witnesses}
     Evidence: {evidence}
 
-    Provide:
-    1. Key timeline events (bullet points)
-    2. Any conflicts or gaps
-    """
+    Your output should include:
+    - A chronological ordering of key events with timestamps or time ranges (if available)
+    - Clear attribution of each event to its source (overview vs witness)
+    - Identification of temporal gaps, ambiguities, or conflicts
+    - Notes on events with uncertain or approximate timing
+
+    Explicitly distinguish between:
+    - Confirmed events
+    - Disputed or conflicting accounts
+    - Estimated or inferred timing (label clearly)
+
+    Maintain neutral, investigator-grade language suitable for early-stage case analysis.
+"""
 
     response = llm.invoke(prompt)
 

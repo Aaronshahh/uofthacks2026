@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidence Upload - Detective Evidence Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🗁 Anchor</h1>
+            <p class="subtitle">Evidence Upload</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content" style="max-width: 800px; margin: 40px auto;">
+             <a href="index.html" class="back-btn">← Back to Home</a>
+
+            <div class="upload-section">
+                <h2>Upload Evidence</h2>
+                
+                <div class="evidence-form">
+                    <div class="form-group">
+                        <label>Evidence Type</label>
+                        <select id="evidenceType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="footprint">Footprint</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload Footprint Image</label>
+                        <div class="upload-area" id="uploadArea" style="margin-bottom: 20px;">
+                            <div class="upload-icon">📷</div>
+                            <p>Click to upload footprint image</p>
+                            <input type="file" id="fileInput" accept="image/*" hidden>
+                            <button class="btn-primary" id="browseBtn" type="button">Browse Image</button>
+                        </div>
+                        <div id="imagePreview" style="margin-top: 10px; text-align: center;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ID Number (Format: 001_02)</label>
+                        <input type="text" id="idNumber" placeholder="001_02" pattern="\d{3}_\d{2}" 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select id="gender" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="">Select Gender</option>
+                            <option value="M">M (Male)</option>
+                            <option value="W">W (Female)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <input type="text" id="brand" placeholder="e.g., Nike, Adidas, Puma" 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Model/Details</label>
+                        <textarea id="modelDetails" placeholder="Enter shoe model or other details..." rows="4" 
+                                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Shoe Size</label>
+                        <input type="number" id="size" placeholder="e.g., 7" step="0.1" min="0"
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+
+                    <button class="btn-submit" id="submitBtn" type="button">Submit Evidence</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const submitBtn = document.getElementById('submitBtn');
+
+        browseBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#667eea';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ddd';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ddd';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileInput.files = e.dataTransfer.files;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            const idNumber = document.getElementById('idNumber').value;
+            const gender = document.getElementById('gender').value;
+            const brand = document.getElementById('brand').value;
+            const modelDetails = document.getElementById('modelDetails').value;
+            const size = document.getElementById('size').value;
+            const file = fileInput.files[0];
+
+            // Validation
+            if (!file) {
+                alert('Please upload a footprint image');
+                return;
+            }
+            if (!idNumber.match(/^\d{3}_\d{2}$/)) {
+                alert('ID Number must be in format 001_02');
+                return;
+            }
+            if (!gender) {
+                alert('Please select gender');
+                return;
+            }
+            if (!size) {
+                alert('Please enter size');
+                return;
+            }
+
+            // Disable submit button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            try {
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('id_number', idNumber);
+                formData.append('gender', gender);
+                formData.append('brand', brand);
+                formData.append('model_details', modelDetails);
+                formData.append('size', size);
+
+                // Send to backend API
+                const response = await fetch('http://localhost:5000/api/upload-footprint', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✅ ${result.message}\n\nID: ${result.data.id}\nEmbedding Dimensions: ${result.data.embedding_dimensions}`);
+                    
+                    // Reset form
+                    document.getElementById('idNumber').value = '';
+                    document.getElementById('gender').value = '';
+                    document.getElementById('brand').value = '';
+                    document.getElementById('modelDetails').value = '';
+                    document.getElementById('size').value = '';
+                    fileInput.value = '';
+                    imagePreview.innerHTML = '';
+                } else {
+                    alert(`❌ Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert(`❌ Failed to upload: ${error.message}\n\nMake sure the API server is running on http://localhost:5000`);
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Evidence';
+            }
+        });
+    </script>
+</body>
+</html>

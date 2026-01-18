@@ -3,216 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Case Analysis - Detective System</title>
+    <title>Case Documentation & Analysis</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .analysis-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .back-btn {
-            background: #2c3e50;
-            color: #d4af37;
-            border: 2px solid #d4af37;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .back-btn:hover {
-            background: #d4af37;
-            color: #1a1a2e;
-        }
-
-        .analysis-form {
-            background: #16213e;
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #d4af37;
-            margin-bottom: 30px;
-        }
-
-        .analysis-form h2 {
-            color: #d4af37;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 10px;
-        }
-
-        .form-section {
-            margin-bottom: 25px;
-        }
-
-        .form-section label {
-            display: block;
-            color: #d4af37;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .form-section textarea,
-        .form-section input {
-            width: 100%;
-            background: #0f1621;
-            color: #e8e8e8;
-            border: 1px solid #d4af37;
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-        }
-
-        .form-section textarea {
-            min-height: 100px;
-        }
-
-        .btn-analyze-case {
-            background: #d4af37;
-            color: #1a1a2e;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .btn-analyze-case:hover {
-            background: #f0c744;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-analyze-case:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: #d4af37;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid #0f1621;
-            border-top: 4px solid #d4af37;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .results-container {
-            display: none;
-            background: #16213e;
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #d4af37;
-        }
-
-        .results-container.active {
-            display: block;
-        }
-
-        .results-container h2 {
-            color: #d4af37;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 10px;
-        }
-
-        .agent-report {
-            background: #0f1621;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border-left: 4px solid #d4af37;
-        }
-
-        .agent-report h3 {
-            color: #d4af37;
-            margin-bottom: 10px;
-        }
-
-        .agent-report pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #e8e8e8;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .concluding-report {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            border: 3px solid #d4af37;
-            margin-top: 30px;
-        }
-
-        .concluding-report h2 {
-            color: #d4af37;
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .concluding-report pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #e8e8e8;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .error-message {
-            background: #5c1a1a;
-            color: #ff6b6b;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: none;
-        }
-
-        .error-message.active {
-            display: block;
-        }
-    </style>
 </head>
 <body>
     <div class="header">
-        <div class="badge">
-            <div class="badge-icon">★</div>
-        </div>
         <div class="header-content">
-            <h1>POLICE DEPARTMENT</h1>
-            <p class="subtitle">AI Case Analysis System</p>
+            <h1>🗁 Anchor</h1>
+            <p class="subtitle">Case Documentation & Analysis</p>
         </div>
     </div>
 
@@ -220,7 +18,7 @@
         <a href="index.html" class="back-btn">← Back to Evidence Upload</a>
 
         <div class="analysis-form">
-            <h2>🤖 Submit Case for AI Analysis</h2>
+            <h2>Submit Case for AI Analysis</h2>
             <p style="color: #e8e8e8; margin-bottom: 20px;">
                 Fill in all case details below. Our AI agents will analyze the information and provide a comprehensive report.
             </p>
