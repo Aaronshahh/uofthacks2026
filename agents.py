@@ -67,8 +67,13 @@ llm = ChatOpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
-# Initialize RAG Query Service
-rag_service = RAGQueryService()
+# Initialize RAG Query Service (may fail if Snowflake not configured)
+try:
+    rag_service = RAGQueryService()
+    print("✅ RAG Query Service initialized")
+except Exception as e:
+    print(f"⚠️ RAG Query Service unavailable: {e}")
+    rag_service = None
 
 
 def physical_evidence_node(state: CaseState):
@@ -78,8 +83,8 @@ def physical_evidence_node(state: CaseState):
     """
     rag_context = ""
     
-    # If evidence image is provided, retrieve similar cases from database
-    if state.get('evidence_image'):
+    # If evidence image is provided and RAG service is available, retrieve similar cases
+    if state.get('evidence_image') and rag_service:
         print(f"📸 Evidence image detected: {len(state['evidence_image'])} bytes")
         try:
             print("🔍 Querying RAG service for similar cases...")
@@ -87,12 +92,13 @@ def physical_evidence_node(state: CaseState):
             rag_context = format_cases_for_display(rag_result)
             print(f"✅ RAG retrieval successful: {len(rag_result.cases)} cases found")
         except Exception as e:
-            print(f"❌ RAG retrieval failed: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            rag_context = f"Note: RAG retrieval failed ({str(e)}). Proceeding with case analysis."
+            print(f"⚠️ RAG retrieval skipped: {type(e).__name__}")
+            rag_context = "RAG database not available. Proceeding with standard analysis."
+    elif state.get('evidence_image') and not rag_service:
+        print("⚠️ Evidence image provided but RAG service unavailable - skipping retrieval")
+        rag_context = "RAG database not configured. Proceeding with standard analysis."
     else:
-        print("⚠️ No evidence image provided - skipping RAG retrieval")
+        print("ℹ️ No evidence image provided - skipping RAG retrieval")
     
     print(f"\n--- RAG Context ---\n{rag_context}\n-------------------\n")
 

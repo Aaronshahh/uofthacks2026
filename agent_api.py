@@ -131,14 +131,8 @@ def analyze_case():
             # Drop raw bytes from the response to avoid serialization issues
             safe_case_state.pop('evidence_image', None)
 
-        # Generate video reconstruction if images are available
-        video_reconstruction = None
-        if saved_image_paths or evidence_image_bytes:
-            video_reconstruction = generate_video_reconstruction(
-                concluding_report,
-                saved_image_paths if saved_image_paths else None,
-                evidence_image_bytes if not saved_image_paths else None
-            )
+        # NOTE: Image reconstruction is now ONLY available in the separate /api/generate-reconstruction endpoint
+        # This keeps case analysis fast and prevents timeouts
 
         response_data = {
             'success': True,
@@ -146,9 +140,6 @@ def analyze_case():
             'concluding_report': concluding_report,
             'case_state': safe_case_state
         }
-        
-        if video_reconstruction:
-            response_data['video_reconstruction'] = video_reconstruction
 
         return jsonify(response_data)
 
