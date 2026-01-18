@@ -76,29 +76,7 @@
                 </div>
 
                 <div class="form-section">
-<<<<<<< HEAD
                     <label for="witnessTestimony">👥 Witness Statements *</label>
-=======
-                    <label for="evidenceImages">🎬 Scene Images (Optional - for Video Reconstruction)</label>
-                    <input
-                        type="file"
-                        id="evidenceImages"
-                        name="evidence_images"
-                        accept="image/png,image/jpeg,image/jpg,image/gif"
-                        multiple
-                        style="padding: 8px; cursor: pointer;"
-                    >
-                    <small style="color: #aaa; display: block; margin-top: 5px;">
-                        Upload scene images in chronological order (beginning, middle, end) for AI video reconstruction
-                    </small>
-                    <div id="sceneImagesPreview" style="margin-top: 10px; display: none;">
-                        <div id="sceneImagesList" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <label for="witnessTestimony">👥 Witness Testimony *</label>
->>>>>>> caeea02de2b2e2a017cda7bdea6c112376bbd1a4
                     <textarea
                         id="witnessTestimony"
                         name="wit_test"
@@ -165,9 +143,6 @@
         const evidenceImageInput = document.getElementById('evidenceImage');
         const imagePreview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
-        const evidenceImagesInput = document.getElementById('evidenceImages');
-        const sceneImagesPreview = document.getElementById('sceneImagesPreview');
-        const sceneImagesList = document.getElementById('sceneImagesList');
         const reconstructionContainer = document.getElementById('reconstructionContainer');
         const reconstructionStatus = document.getElementById('reconstructionStatus');
         const storyboardFrames = document.getElementById('storyboardFrames');
@@ -184,30 +159,6 @@
                 reader.readAsDataURL(file);
             } else {
                 imagePreview.style.display = 'none';
-            }
-        });
-
-        // Scene images preview handler for video reconstruction
-        evidenceImagesInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length > 0) {
-                sceneImagesList.innerHTML = '';
-                files.forEach((file, index) => {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const imgContainer = document.createElement('div');
-                        imgContainer.style.cssText = 'text-align: center;';
-                        imgContainer.innerHTML = `
-                            <img src="${event.target.result}" style="max-width: 150px; max-height: 150px; border: 2px solid #3b82f6; border-radius: 5px;">
-                            <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Scene ${index + 1}</div>
-                        `;
-                        sceneImagesList.appendChild(imgContainer);
-                    };
-                    reader.readAsDataURL(file);
-                });
-                sceneImagesPreview.style.display = 'block';
-            } else {
-                sceneImagesPreview.style.display = 'none';
             }
         });
 
@@ -235,15 +186,6 @@
             if (imageFile) {
                 formData.append('evidence_image', imageFile);
                 console.log('Evidence image attached:', imageFile.name);
-            }
-
-            // Add scene images for video reconstruction
-            const sceneFiles = evidenceImagesInput.files;
-            if (sceneFiles.length > 0) {
-                Array.from(sceneFiles).forEach((file, index) => {
-                    formData.append('evidence_images', file);
-                    console.log(`Scene image ${index + 1} attached:`, file.name);
-                });
             }
 
             try {
