@@ -5,6 +5,22 @@ import os
 from langgraph.graph import StateGraph, END
 from RAG.rag_query import RAGQueryService, format_cases_for_display
 
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed, skip
+
+# Load Google API key from environment variable
+# Get your API key from: https://makersuite.google.com/app/apikey
+if not os.getenv("GOOGLE_API_KEY"):
+    raise ValueError(
+        "GOOGLE_API_KEY environment variable is not set. "
+        "Please set it with: export GOOGLE_API_KEY='your-api-key' "
+        "or add GOOGLE_API_KEY=your-api-key to a .env file"
+    )
+
 '''
 This class is the shared folder that all of the chatbots have access to,
 from here very specific information is going to be passed to each gemini agent
@@ -37,7 +53,8 @@ class CaseState(TypedDict):
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    temperature=0.3
+    temperature=0.3,
+    google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
 # Initialize RAG Query Service

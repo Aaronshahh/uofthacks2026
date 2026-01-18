@@ -3,3 +3,11 @@ node_modules/
 *.log
 .DS_Store
 uploads/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+footwear_rag/data/zip_files/*.zip
+footwear_rag/data/zip_files/*.xlsx
+footwear_rag/data/zip_files/11624073/
+ingestion.log

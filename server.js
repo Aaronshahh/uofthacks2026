@@ -14,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.')); // Serve frontend files
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
+app.use('/outputs', express.static('outputs')); // Serve generated images/videos
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
