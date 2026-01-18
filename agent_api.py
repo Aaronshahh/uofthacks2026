@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from agents import detective_orchestrator, CaseState
+from RAG.embeddings import EmbeddingService
+from RAG.database import SnowflakeVectorDB
 import json
 import os
 
@@ -164,6 +166,145 @@ def generate_concluding_report(initial_state, agent_reports):
     report_sections.append("=" * 80)
 
     return "\n".join(report_sections)
+
+
+@app.route('/api/upload-footprint', methods=['POST'])
+def upload_footprint():
+    """
+    Endpoint to upload footprint evidence to the database.
+    
+    Expected multipart form data:
+    - image: Footprint image file
+    - id_number: ID in format XXX_YY (e.g., 001_02)
+    - gender: M or W
+    - brand: Shoe brand
+    - model_details: Shoe model or other details
+    - size: Shoe size in cm (float)
+    """
+    try:
+        # Validate image file
+        if 'image' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No image file provided'
+            }), 400
+        
+        file = request.files['image']
+        if file.filename == '' or not allowed_file(file.filename):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid image file'
+            }), 400
+        
+        # Get form data
+        id_number = request.form.get('id_number', '').strip()
+        gender = request.form.get('gender', '').strip()
+        brand = request.form.get('brand', '').strip()
+        model_details = request.form.get('model_details', '').strip()
+        size = request.form.get('size', '').strip()
+        
+        # Validate required fields
+        if not id_number or not gender or not size:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: id_number, gender, or size'
+            }), 400
+        
+        # Validate ID format (XXX_YY)
+        import re
+        if not re.match(r'^\d{3}_\d{2}$', id_number):
+            return jsonify({
+                'success': False,
+                'error': 'ID number must be in format XXX_YY (e.g., 001_02)'
+            }), 400
+        
+        # Validate gender
+        if gender not in ['M', 'W']:
+            return jsonify({
+                'success': False,
+                'error': 'Gender must be M or W'
+            }), 400
+        
+        # Validate size
+        try:
+            size_float = float(size)
+            if size_float <= 0:
+                raise ValueError("Size must be positive")
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Size must be a valid positive number'
+            }), 400
+        
+        # Read image bytes
+        image_data = file.read()
+        print(f"📸 Footprint image uploaded: {len(image_data)} bytes")
+        
+        # Save image to uploads folder
+        filename = secure_filename(f"{id_number}_{file.filename}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        with open(filepath, 'wb') as f:
+            f.write(image_data)
+        print(f"💾 Image saved to: {filepath}")
+        
+        # Generate embedding using EmbeddingService
+        print("🔄 Generating image embedding...")
+        embedding_service = EmbeddingService()
+        
+        # Use local embeddings by default to match 512-dimension database
+        embedding = embedding_service.generate_embedding(
+            image_data,
+            use_snowflake=False,  # Use local to ensure 512 dimensions
+            preprocess=True
+        )
+        print(f"✅ Embedding generated: {len(embedding)} dimensions")
+        
+        # Prepare metadata
+        metadata = {
+            'id_number': id_number,
+            'gender': gender,
+            'brand': brand,
+            'model_details': model_details,
+            'size': size_float,
+            'filename': filename,
+            'image_path': filepath
+        }
+        
+        # Insert into Snowflake database
+        print("📤 Uploading to Snowflake database...")
+        db = SnowflakeVectorDB()
+        
+        db.insert_record(
+            id=id_number,
+            image_path=filepath,
+            metadata=metadata,
+            embedding=embedding
+        )
+        
+        print(f"✅ Footprint {id_number} successfully uploaded to database")
+        
+        # Clean up connections
+        embedding_service.close()
+        db.disconnect()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Footprint evidence {id_number} uploaded successfully',
+            'data': {
+                'id': id_number,
+                'metadata': metadata,
+                'embedding_dimensions': len(embedding)
+            }
+        })
+    
+    except Exception as e:
+        print(f"❌ Error uploading footprint: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Failed to upload footprint: {str(e)}'
+        }), 500
 
 
 @app.route('/health', methods=['GET'])

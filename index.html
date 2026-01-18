@@ -5,129 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detective Evidence Management System</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px;
+        }
+
+        .landing-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .landing-badge {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .landing-badge-icon {
+            font-size: 60px;
+            color: #1a1a2e;
+        }
+
+        .landing-header h1 {
+            font-size: 48px;
+            color: #fff;
+            margin: 0 0 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .landing-subtitle {
+            font-size: 24px;
+            color: #a8b2d1;
+            margin: 0;
+        }
+
+        .landing-buttons {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .landing-btn {
+            padding: 25px 50px;
+            font-size: 20px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 280px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-evidence {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-evidence:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-analysis {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-analysis:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.6);
+        }
+
+        .landing-btn span {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="badge">
-            <div class="badge-icon">★</div>
-        </div>
-        <div class="header-content">
+    <div class="landing-page">
+        <div class="landing-header">
+            <div class="landing-badge">
+                <div class="landing-badge-icon">★</div>
+            </div>
             <h1>POLICE DEPARTMENT</h1>
-            <p class="subtitle">Evidence Management System</p>
-        </div>
-        <div class="case-number">
-            <label>Case #:</label>
-            <input type="text" id="caseNumber" placeholder="Enter case number">
-        </div>
-        <button class="btn-analyze" onclick="window.location.href='case-analysis.html'">
-            🤖 AI Case Analysis
-        </button>
-    </div>
-
-    <div class="container">
-        <div class="sidebar">
-            <h2>Evidence Categories</h2>
-            <div class="category-list">
-                <button class="category-btn active" data-category="forensic">
-                    <span class="icon">🔬</span>
-                    Forensic Data
-                </button>
-                <button class="category-btn" data-category="witness">
-                    <span class="icon">👤</span>
-                    Witness Testimony
-                </button>
-                <button class="category-btn" data-category="images">
-                    <span class="icon">📷</span>
-                    Images/Photos
-                </button>
-                <button class="category-btn" data-category="documents">
-                    <span class="icon">📄</span>
-                    Documents
-                </button>
-                <button class="category-btn" data-category="physical">
-                    <span class="icon">📦</span>
-                    Physical Evidence
-                </button>
-                <button class="category-btn" data-category="digital">
-                    <span class="icon">💾</span>
-                    Digital Evidence
-                </button>
-                <button class="category-btn" data-category="audio">
-                    <span class="icon">🎵</span>
-                    Audio/Video
-                </button>
-            </div>
+            <p class="landing-subtitle">Evidence Management System</p>
         </div>
 
-        <div class="main-content">
-            <div class="upload-section">
-                <h2>Upload Evidence</h2>
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📁</div>
-                    <p>Drag and drop files here or click to browse</p>
-                    <p class="upload-hint">Supported formats: All file types</p>
-                    <input type="file" id="fileInput" multiple hidden>
-                    <button class="btn-primary" id="browseBtn">Browse Files</button>
-                </div>
-
-                <div class="evidence-form">
-                    <div class="form-group">
-                        <label>Evidence Description</label>
-                        <textarea id="evidenceDescription" placeholder="Provide detailed description of the evidence..." rows="3"></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Collected By</label>
-                            <input type="text" id="collectedBy" placeholder="Officer name">
-                        </div>
-                        <div class="form-group">
-                            <label>Date Collected</label>
-                            <input type="date" id="dateCollected">
-                        </div>
-                        <div class="form-group">
-                            <label>Time Collected</label>
-                            <input type="time" id="timeCollected">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" id="location" placeholder="Where was the evidence found?">
-                    </div>
-
-                    <button class="btn-submit" id="submitBtn">Submit Evidence</button>
-                </div>
-            </div>
-
-            <div class="evidence-list">
-                <div class="section-header">
-                    <h2>Evidence Log</h2>
-                    <button class="btn-export" id="exportBtn">Export Report</button>
-                </div>
-                <div class="filter-bar">
-                    <input type="text" id="searchInput" placeholder="Search evidence...">
-                    <select id="sortSelect">
-                        <option value="date-desc">Newest First</option>
-                        <option value="date-asc">Oldest First</option>
-                        <option value="name">By Name</option>
-                    </select>
-                </div>
-                <div id="evidenceItems" class="evidence-items">
-                    <!-- Evidence items will be dynamically inserted here -->
-                </div>
-            </div>
+        <div class="landing-buttons">
+            <a href="evidence-upload.html" class="landing-btn btn-evidence">
+                <span>📁</span>
+                Evidence Upload
+            </a>
+            <a href="case-analysis.html" class="landing-btn btn-analysis">
+                <span>🤖</span>
+                AI Case Analysis
+            </a>
         </div>
     </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Evidence Details</h2>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
